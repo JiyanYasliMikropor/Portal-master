@@ -1,0 +1,933 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    Layout = "_LayoutPP_OT";
+    ViewData["Title"] = "Fazla Mesai";
+}
+
+<style>
+    th {
+        font-size: 11px;
+    }
+
+        th .form-control {
+            font-size: 11px;
+            height: 29px;
+            line-height: 20px;
+            padding: 5px;
+        }
+
+        th .input-group-addon {
+            background-color: #fff;
+            border: 1px solid #b5b5b5;
+            border-radius: 1px;
+            color: inherit;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1;
+            padding: 0px 2px;
+            text-align: center;
+        }
+
+    table.dataTable {
+        clear: both;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        max-width: none !important;
+        border-collapse: separate !important;
+        border-spacing: 0;
+    }
+
+    thead {
+        width: 100%;
+    }
+
+    div.DTFC_LeftWrapper table.dataTable.no-footer, div.DTFC_RightWrapper table.dataTable.no-footer {
+        background: #fff;
+    }
+
+    .dt-button.buttons-excel.buttons-html5 {
+        margin-bottom: 15px;
+    }
+
+    .contentText {
+        float: left;
+        width: 100%;
+        padding: 0px 0px 6px 0px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #efefef;
+    }
+
+    .font-normal {
+        float: left;
+        width: 100%;
+    }
+
+    .table .form-control {
+        background-color: #FFFFFF;
+        background-image: none;
+        border: 1px solid #b5b5b5;
+        border-radius: 1px;
+        color: inherit;
+        display: block;
+        padding: 3px 3px;
+        transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+        width: 100%;
+        font-size: 11px;
+        font-weight: 600;
+        height: 24px;
+    }
+
+    .fileList {
+        margin: 15px 0px;
+    }
+
+        .fileList .btn-xs {
+            float: right;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+
+    .file {
+        margin-right: 10px;
+    }
+
+    .removeFile {
+        position: absolute;
+        right: 15px;
+        top: 6px;
+        z-index: 999;
+    }
+
+    .attachment {
+        list-style: none;
+        float: left;
+        margin-left: 0px;
+        padding-left: 15px;
+    }
+
+        .attachment .file-box {
+            position: relative;
+        }
+
+    .file-box {
+        float: left;
+    }
+    .overtimeSum{
+        text-align:right;
+    }
+</style>
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="ibox float-e-margins">
+
+                <div class="ibox-title">
+                    <h5>Fazla Mesai Talep Listesi</h5>
+                </div>
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" onclick="getAllOvertimeList()" href="#home">Tümü</a></li>
+                    <li><a data-toggle="tab" onclick="getAllOvertimeListFilter(durum='Beklemede')" href="#menu1">Onay Bekleyenler</a></li>
+                    <li><a data-toggle="tab" onclick="getAllOvertimeListFilter(durum='Reddedildi')" href="#menu2">Reddedilenler</a></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div id="home" class="tab-pane fade in active">
+                        <div class="ibox-content m-b-sm border-bottom">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group" id="data_1">
+                                        <label class="font-normal">Baş. Tarih</label>
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input id="searchStartDate" type="text" data-date-format="dd/mm/yyyy" onChange="getAllOvertimeList();" data-date-end-date="0d" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group" id="data_1">
+                                        <label class="font-normal">Bit. Tarih</label>
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input id="searchEndDate" data-date-format="dd/mm/yyyy" onChange="getAllOvertimeList();" data-date-end-date="0d" type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="overtimeSum">
+                                        <h4>Toplam Fazla Mesai Süresi: <strong><span id="overtimeSum"></span></strong> Saat</h4>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="ibox-content">
+                            <table id="example" class="table table-striped table-bordered nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Talep Eden Müdürlük
+                                            <select id="searchDepartmentName" nmae="searchDepartmentName" onChange="getAllOvertimeList();" class="form-control filter">
+                                            </select>
+                                        </th>
+                                        <th>Sicil No <input type="text" id="searchUsersEmployeeCodeNo" placeholder="Personel Adı Giriniz" class="form-control filter"></th>
+                                        <th>Personel Adı <input type="text" id="searchFullname" placeholder="Personel Adı Giriniz" class="form-control filter"></th>
+                                        <th>FM Tarihi</th>
+                                        <th>FM Süresi</th>
+                                        <th>
+                                            FM Vardiya
+                                            <select id="searchShiftName" name="searchShiftName" onChange="getAllOvertimeList();" class="form-control filter">
+                                            </select>
+                                        </th>
+                                        <th>Talep Eden</th>
+                                        <th>Talep Tarihi</th>
+                                        <th>
+                                            Fazla Mesai Türü
+                                            <select id="searchOvertimeTypeName" name="searchOvertimeTypeName" onChange="getAllOvertimeList();" class="form-control filter">
+                                            </select>
+                                        </th>
+                                        <th>FM Nedeni</th>
+                                        <th>
+                                            Durum
+                                            <select id="searchConfirmation" name="searchConfirmation" onChange="getAllOvertimeList();" class="form-control filter">
+                                                <option value="">Hepsi</option>
+                                                <option value="Beklemede">Beklemede</option>
+                                                <option value="Reddedildi">Reddedildi</option>
+                                                <option value="Onaylandı">Onaylandı</option>
+                                            </select>
+                                        </th>
+
+                                        @*{ "data": "departmentName" },
+                                            { "data": "usersEmployeeCode" },
+                                            { "data": "fullname" },
+                                            { "data": "overtimeDate" },
+                                            { "data": "shiftTime" },
+                                            { "data": "shiftName" },
+                                            { "data": "createdByName" },
+                                            { "data": "createdDateFormat" },
+                                            { "data": "overtimeTypeName" },
+                                            { "data": "overtimeReason" },
+                                            { "data": "confirmation" },*@
+
+
+                                    </tr>
+                                </thead>
+                            </table>
+                            <div class="row"></div>
+                            <div class="addPersonelList"></div>
+                        </div>
+                    </div>
+                    <div id="menu1" class="tab-pane fade">
+                        <div class="ibox-content">
+                            <table id="exampleOnay" class="table table-striped table-bordered nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+
+                                        <th>Talep Eden Müdürlük</th>
+                                        <th>Sicil No</th>
+                                        <th>Personel Adı</th>
+                                        <th>FM Tarihi</th>
+                                        <th>FM Süresi</th>
+                                        <th>FM Vardiya</th>
+                                        <th>Talep Eden</th>
+                                        <th>Talep Tarihi</th>
+                                        <th>Fazla Mesai Türü</th>
+                                        <th>FM Nedeni</th>
+                                        <th>Durum</th>
+                                        <th>Seçim</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <div class="row"></div>
+                            <div class="addPersonelListOnay"></div>
+                            <div class="row">
+
+                                <input id="PersonList" type="hidden" />
+                                @if (User.IsInRole("PP-OTAdmin"))
+                                {
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-w-m btn-sm btn-primary pull-right m-sm" onclick="SelectedItemApprove(durum = 'Beklemede')">Seçili Olanları Onayla</button>
+                                        <button type="button" class="btn btn-w-m btn-sm btn-primary pull-right m-sm" onclick="AllListApprove(durum = 'Beklemede')">Tümünü Onayla</button>
+                                        <button type="button" class="btn btn-w-m btn-sm btn-danger pull-left m-sm" onclick="SelectedItemDenial()">Seçili Olanları Reddet</button>
+                                        <button type="button" class="btn btn-w-m btn-sm btn-danger pull-left m-sm" onclick="AllListDenial()">Tümünü Reddet</button>
+                                    </div>
+
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div id="menu2" class="tab-pane fade">
+                        <div class="ibox-content">
+                            <table id="exampleRet" class="table table-striped table-bordered nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+
+                                        <th>Talep Eden Müdürlük</th>
+                                        <th>Sicil No</th>
+                                        <th>Personel Adı</th>
+                                        <th>FM Tarihi</th>
+                                        <th>FM Süresi</th>
+                                        <th>FM Vardiya</th>
+                                        <th>Talep Eden</th>
+                                        <th>Talep Tarihi</th>
+                                        <th>Fazla Mesai Türü</th>
+                                        <th>FM Nedeni</th>
+                                        <th>Durum</th>
+                                        <th>Seçim</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            <div class="row"></div>
+                            <div class="addPersonelListRed"></div>
+                            <div class="row">
+                                @if (User.IsInRole("PP-OTAdmin"))
+                                {
+                                    <input id="PersonList" type="hidden" />
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-w-m btn-sm btn-primary pull-right m-sm" onclick="SelectedItemApprove(durum = 'Reddedildi')">Seçili Olanları Onayla</button>
+                                        <button type="button" class="btn btn-w-m btn-sm btn-primary pull-right m-sm" onclick="AllListApprove(durum = 'Reddedildi')">Tümünü Onayla</button>
+                                    </div>
+                                }
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    var UserId = @ViewBag.UserId;
+    if (parseInt(UserId) == 6) {
+        $('.nav-tabs a[href="#menu1"]').tab('show')
+    }
+    var tbl;
+    var tblOnay;
+    var tblRet;
+    var OvertimeListArr = new Array;
+    var SelectedListArr = new Array;
+    $(document).ready(function () {
+        if (parseInt(UserId) == 6) {
+            getAllOvertimeListFilter(durum = 'Beklemede');
+        } else {
+            getAllShiftList();
+        }
+ 
+
+        getAllDepartmentList();
+        getAllOvertimeTypeList();
+        tbl = $('#example').DataTable({
+            searching: false,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Turkish.json"
+            },
+            pageLength: 10,
+            scrollY: false,
+            scrollX: true,
+            data: OvertimeListArr,
+            dom: 'Bfrtip',
+            buttons: [
+                'excel',
+            ],
+            columns: [
+
+                { "data": "departmentName" },
+                { "data": "usersEmployeeCode" },
+                { "data": "fullname" },
+                { "data": "overtimeDate" },
+                { "data": "shiftTime" },
+                { "data": "shiftName" },
+                { "data": "createdByName" },
+                { "data": "createdDateFormat" },
+                { "data": "overtimeTypeName" },
+                { "data": "overtimeReason" },
+                { "data": "confirmation" },
+
+
+
+                //{ "title" :"FM Üretim Bilgileri", "data": "overtimeProductionInformation" }
+
+            ],
+
+            rowReorder: {
+                selector: 'td:nth-child(5)'
+            },
+
+            'order': [[1, 'asc']]
+        });
+
+        tblOnay = $('#exampleOnay').DataTable({
+
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Turkish.json"
+            },
+            pageLength: 10,
+            scrollY: false,
+            scrollX: true,
+            scrollCollapse: true,
+            paging: false,
+            data: OvertimeListArr,
+            fixedColumns: {
+                leftColumns: 0,
+                rightColumns: 1
+            },
+            dom: 'Bfrtip',
+            buttons: [
+                'excel',
+            ],
+            columns: [
+
+                { "data": "departmentName" },
+                { "data": "usersEmployeeCode" },
+                { "data": "fullname" },
+                { "data": "overtimeDate" },
+                { "data": "shiftTime" },
+                { "data": "shiftName" },
+                { "data": "createdByName" },
+                { "data": "createdDateFormat" },
+                { "data": "overtimeTypeName" },
+                { "data": "overtimeReason" },
+                { "data": "confirmation" },
+                { "data": null },
+
+                //{ "title" :"FM Üretim Bilgileri", "data": "overtimeProductionInformation" }
+
+            ],
+            'columnDefs': [{
+                'targets': 11,
+                'searchable': false,
+                'orderable': false,
+                'className': 'dt-body-center',
+                'render': function (data, type, full, meta) {
+                    return '<input onclick="addSeciliPerson(' + $('<div/>').text(data.overtimeRequestStaffId).html() + ')" type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                }
+            }],
+            rowReorder: {
+                selector: 'td:nth-child(5)'
+            },
+
+            'order': [[1, 'asc']]
+        });
+
+        tblRet = $('#exampleRet').DataTable({
+
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Turkish.json"
+            },
+            pageLength: 10,
+            scrollY: false,
+            scrollX: true,
+            scrollCollapse: true,
+            paging: false,
+            data: OvertimeListArr,
+            fixedColumns: {
+                leftColumns: 0,
+                rightColumns: 1
+            },
+            dom: 'Bfrtip',
+            buttons: [
+                'excel',
+            ],
+            columns: [
+
+                { "data": "departmentName" },
+                { "data": "usersEmployeeCode" },
+                { "data": "fullname" },
+                { "data": "overtimeDate" },
+                { "data": "shiftTime" },
+                { "data": "shiftName" },
+                { "data": "createdByName" },
+                { "data": "createdDateFormat" },
+                { "data": "overtimeTypeName" },
+                { "data": "overtimeReason" },
+                { "data": "confirmation" },
+                { "data": null },
+
+
+                //{ "title" :"FM Üretim Bilgileri", "data": "overtimeProductionInformation" }
+
+            ],
+            'columnDefs': [{
+                'targets': 11,
+                'searchable': false,
+                'orderable': false,
+                'className': 'dt-body-center',
+                'render': function (data, type, full, meta) {
+                    return '<input onclick="addSeciliPerson(' + $('<div/>').text(data.overtimeRequestStaffId).html() + ')" type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                }
+            }],
+            rowReorder: {
+                selector: 'td:nth-child(5)'
+            },
+
+            'order': [[1, 'asc']]
+        });
+        getAllOvertimeList();
+    });
+
+    function getAllDepartmentList() {
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewData["UrlPath"]/PP_OT/GetAllDepartmentList",
+            success: function (data) {
+                var optionData = "<option value=''>Hepsi</option>";
+                $.each(data.departmentList, function (key, value) {
+                    optionData += "<option value='" + value.ggyAdi + "'>" + value.ggyAdi + "</option>";
+                });
+                $('#searchDepartmentName').append(optionData);
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+    }
+
+        //Fazla mesai türü listesi getir
+    function getAllOvertimeTypeList() {
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewData["UrlPath"]/PP_OT/GetAllOvertimeTypeList",
+            success: function (data) {
+                var optionData = "<option value=''>Hepsi</option>";
+                $.each(data.overtimeType, function (key, value) {
+                    optionData += "<option value='" + value.name + "'>" + value.name + "</option>";
+                });
+                $('#searchOvertimeTypeName').append(optionData);
+             
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+    }
+        //Varidiya Listesi Getir
+    function getAllShiftList() {
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewData["UrlPath"]/PP_OT/GetAllShiftList",
+            success: function (data) {
+                var optionData = "<option value=''>Hepsi</option>";
+                $.each(data.getAllShiftList, function (key, value) {
+                    optionData += "<option value='" + value.name + "'>" + value.name + "</option>";
+                });
+                $('#searchShiftName').append(optionData);
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+    }
+    //Personel Seçimi
+    function addSeciliPerson(data) {
+        if (SelectedListArr.indexOf(data) === -1)
+            SelectedListArr.push(data);
+        else
+            SelectedListArr = SelectedListArr.filter(item => !(item === data));
+        $("#PersonList").val(SelectedListArr);
+        $(".addPersonelList").text("");
+
+        $(".addPersonelList").append("<p>Seçili Personel " + SelectedListArr.length + "</p>");
+    }
+
+    $("#searchUsersEmployeeCodeNo").bind("keyup change keypress", function (e) {
+        getAllOvertimeList();
+    });
+    $("#searchFullname").bind("keyup change keypress", function (e) {
+        getAllOvertimeList();
+    });
+
+
+    function getAllOvertimeList() {
+
+        $.ajax({
+            type: "POST",
+            dataType: 'json',
+            data: { searchStartDate: $("#searchStartDate").val(), searchEndDate: $("#searchEndDate").val(), searchDepartmentName: $("#searchDepartmentName").val(), searchUsersEmployeeCodeNo: $("#searchUsersEmployeeCodeNo").val(),  searchFullname: $("#searchFullname").val(),  searchShiftName: $("#searchShiftName").val(), searchOvertimeTypeName: $("#searchOvertimeTypeName").val(), searchConfirmation: $("#searchConfirmation").val() },
+            url: "@ViewData["UrlPath"]/PP_OT/GetAllOvertimeList",
+            success: function (data) {
+
+                if (data == null) {
+                    $(".personList").text("");
+
+                    OvertimeListDoldur();
+                    tbl.clear();
+                    tbl.rows.add(OvertimeListArr);
+                    $("#overtimeSum").text("");
+                    tbl.draw();
+                } else {
+                    if (data.isSuccess) {
+                        $(".personList").text("");
+                        OvertimeListArr = data.allOvertimeList;
+                        $("#overtimeSum").text(data.overtimeSum);
+                        OvertimeListDoldur();
+                        tbl.clear();
+                        tbl.rows.add(OvertimeListArr);
+                        tbl.draw();
+
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+                    }
+                }
+
+
+            },
+            error: function (e) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.error("Hata oluştu! Lütfen tekrar deneyiniz.")
+
+            },
+            cache: false
+
+        });
+    }
+
+    function getAllOvertimeListFilter(durum) {
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: { durum: durum },
+            url: "@ViewData["UrlPath"]/PP_OT/GetAllOvertimeListFilter",
+            success: function (data) {
+                $(".personList").text("");
+                if (data == null) {
+                    OvertimeListArr = null;
+                } else {
+                    OvertimeListArr = data.allOvertimeList;
+                }
+
+                    if (durum == "Beklemede") {
+                        OvertimeListDoldurOnay();
+                        tblOnay.clear();
+                        tblOnay.rows.add(OvertimeListArr);
+                        tblOnay.draw();
+                    } else {
+                        OvertimeListDoldurRet();
+                        tblRet.clear();
+                        tblRet.rows.add(OvertimeListArr);
+                        tblRet.draw();
+                    }
+            },
+            error: function (e) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.error("Hata oluştu! Lütfen tekrar deneyiniz.")
+
+            },
+            cache: false
+
+        });
+    }
+    //Filter
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
+    });
+
+    function OvertimeListDoldur() {
+        tbl.clear();
+        tbl.rows.add(OvertimeListArr);
+        tbl.draw();
+    }
+
+    function OvertimeListDoldurOnay() {
+        tblOnay.clear();
+        tblOnay.rows.add(OvertimeListArr);
+        tblOnay.draw();
+
+    }
+    function OvertimeListDoldurRet() {
+        tblRet.clear();
+        tblRet.rows.add(OvertimeListArr);
+        tblRet.draw();
+
+    }
+    //İşlemler
+    //Seçili Olanları onaylama.
+    function SelectedItemApprove(durum) {
+        if (SelectedListArr.length == 0) {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning("Fazla mesai seçilmemiş.")
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { FMList: SelectedListArr.toString() },
+                url: "@ViewData["UrlPath"]/PP_OT/SelectedItemApproved",
+                success: function (data) {
+
+                    SelectedListArr = new Array;
+
+                    if (durum == 'Beklemede') {
+                        getAllOvertimeListFilter(durum = 'Beklemede');
+                        tblOnay.clear();
+                        tblOnay.rows.add(OvertimeListArr);
+                        tblOnay.draw();
+                    } else {
+
+                        getAllOvertimeListFilter(durum = 'Reddedildi');
+                        tblRet.clear();
+                        tblRet.rows.add(OvertimeListArr);
+                        tblRet.draw();
+                    }
+
+
+
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.success("Seçili fazla mesai onaylandı.")
+
+
+
+                },
+                error: function (e) {
+                    getAllOvertimeListFilter(durum = 'Beklemede');
+
+                    tblOnay.clear();
+                    tblOnay.rows.add(OvertimeListArr);
+                    tblOnay.draw();
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error("Hata oluştu! Lütfen tekrar deneyiniz.")
+
+                },
+                cache: false
+            });
+        }
+    }
+
+    //Tümünü onayla
+    function AllListApprove(durum) {
+
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewData["UrlPath"]/PP_OT/AllApproved",
+            success: function (data) {
+
+
+
+                if (durum == 'Beklemede') {
+                    getAllOvertimeListFilter(durum = 'Beklemede');
+                    SelectedListArr = new Array;
+                    tblOnay.clear();
+                    tblOnay.rows.add(OvertimeListArr);
+                    tblOnay.draw();
+                } else {
+
+                    getAllOvertimeListFilter(durum = 'Reddedildi');
+                    SelectedListArr = new Array;
+                    tblRet.clear();
+                    tblRet.rows.add(OvertimeListArr);
+                    tblRet.draw();
+                }
+
+
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.success("Fazla mesai tümü onaylandı.")
+
+
+
+            },
+            error: function (e) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.error("Hata oluştu! Lütfen tekrar deneyiniz.")
+
+                getAllOvertimeListFilter(durum = 'Beklemede');
+
+                tblOnay.clear();
+                tblOnay.rows.add(OvertimeListArr);
+                tblOnay.draw();
+
+            },
+            cache: false
+        });
+
+    }
+
+    //Seçili Olanları redddet.
+    function SelectedItemDenial() {
+        if (SelectedListArr.length == 0) {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning("Fazla mesai seçilmemiş.")
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { FMList: SelectedListArr.toString() },
+                url: "@ViewData["UrlPath"]/PP_OT/SelectedItemDenial",
+                success: function (data) {
+
+                        getAllOvertimeListFilter(durum = 'Beklemede');
+                        SelectedListArr = new Array;
+                        tblOnay.clear();
+                        tblOnay.rows.add(OvertimeListArr);
+                        tblOnay.draw();
+
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.success("Seçili fazla mesai reddedildi.")
+
+
+                },
+                error: function (e) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error("Hata oluştu! Lütfen tekrar deneyiniz.")
+                    getAllOvertimeListFilter(durum = 'Beklemede');
+
+                    tblOnay.clear();
+                    tblOnay.rows.add(OvertimeListArr);
+                    tblOnay.draw();
+
+                },
+                cache: false
+            });
+        }
+    }
+
+
+    function AllListDenial() {
+
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewData["UrlPath"]/PP_OT/AllListDenial",
+            success: function (data) {
+
+                    getAllOvertimeListFilter(durum = 'Beklemede');
+                    SelectedListArr = new Array;
+                    tblOnay.clear();
+                    tblOnay.rows.add(OvertimeListArr);
+                    tblOnay.draw();
+
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.success("Fazla mesai tümü reddedildi.")
+
+            },
+            error: function (e) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.error("Hata oluştu! Lütfen tekrar deneyiniz.")
+                getAllOvertimeListFilter(durum = 'Beklemede');
+
+                tblOnay.clear();
+                tblOnay.rows.add(OvertimeListArr);
+                tblOnay.draw();
+
+            },
+            cache: false
+        });
+
+    }
+
+    $("#Home").addClass("active");
+
+
+    $("#searchStartDate").datepicker({
+        todayBtn: "linked",
+        language: "tr",
+        autoclose: true,
+        todayHighlight: true,
+    });
+    $("#searchEndDate").datepicker({
+        todayBtn: "linked",
+        language: "tr",
+        autoclose: true,
+        todayHighlight: true,
+    });
+
+
+</script>

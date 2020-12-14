@@ -1,0 +1,15 @@
+
+Scaffold-DbContext "Server=192.168.2.16;Database=MIKROMES4;User ID=sa;Password=oz1976*er;Trusted_Connection=True;Integrated Security=false;Persist Security Info=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Entity
+
+ Scaffold-DbContext "Server=192.168.2.16;Database=MIKROMES4;User ID=sa;Password=oz1976*er;Trusted_Connection=True;Integrated Security=false;Persist Security Info=True;"
+ Microsoft.EntityFrameworkCore.SqlServer -Tables tbl_MachineOperationMode -OutputDir Entity
+
+
+ 
+ Scaffold-DbContext "Server=192.168.2.16;Database=MIKROMES;User ID=sa;Password=oz1976*er;Trusted_Connection=True;Integrated Security=false;Persist Security Info=True;" Microsoft.EntityFrameworkCore.SqlServer -Tables tbl_Hatalar -OutputDir opp
+
+
+
+
+ --GUSTO
+ Scaffold-DbContext "Server=192.168.2.4;Database=Gusto;User ID=sa;Password=oz1976*er;Trusted_Connection=True;Integrated Security=false;Persist Security Info=True;" Microsoft.EntityFrameworkCore.SqlServer -Tables UrunAgaclari -OutputDir Entity/EntityGusto

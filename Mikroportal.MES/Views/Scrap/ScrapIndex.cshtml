@@ -1,0 +1,827 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    Layout = "_LayoutMES";
+    ViewData["Title"] = "Mes - Hurda Raporları";
+}
+
+
+
+<script>
+    $(document).ready(function () {
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
+        });
+    });
+</script>
+
+
+<style>
+    /* The container */
+    .checkboxContainerS {
+        display: block;
+        position: relative;
+        padding-left: 25px;
+        margin-bottom: 9px;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+        /* Hide the browser's default checkbox */
+        .checkboxContainerS input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+    /* Create a custom checkbox */
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 18px;
+        width: 18px;
+        background-color: #eee;
+    }
+
+    /* On mouse-over, add a grey background color */
+    .checkboxContainerS:hover input ~ .checkmark {
+        background-color: #ccc;
+    }
+
+    /* When the checkbox is checked, add a blue background */
+    .checkboxContainerS input:checked ~ .checkmark {
+        background-color: #2196F3;
+    }
+
+    /* Create the checkmark/indicator (hidden when not checked) */
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    /* Show the checkmark when checked */
+    .checkboxContainerS input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    /* Style the checkmark/indicator */
+    .checkboxContainerS .checkmark:after {
+        left: 7px;
+        top: 3px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+
+    .hiddenTd {
+        display: none !important;
+    }
+
+    .widthClassForTd {
+        width: 8%;
+        white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        white-space: pre-wrap; /* css-3 */
+        word-wrap: break-word; /* Internet Explorer 5.5+ */
+        white-space: -webkit-pre-wrap; /* Newer versions of Chrome/Safari*/
+        word-break: break-all;
+        white-space: normal;
+    }
+
+    .linkRenk a {
+        color: #fff;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-12">
+        <h2>MES - MIKROPOR EXECUTION SYSTEM</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="MesHome">Ana Sayfa</a>
+            </li>
+            @*<li>
+                    <a asp-action="Index" asp-controller="Home">@Localizer["Service"]</a>
+                </li>*@
+            <li class="active">
+                <strong>Hurda Raporları</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="ibox-content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <ul class="nav nav-tabs">
+                            @*<li class="active"><a data-toggle="tab" href="#filtreAlani">Filtrele</a></li>*@
+                            <li class="active"><a data-toggle="tab" href="#hurdaMaliyet">Hurda Maliyet Raporu</a></li>
+
+                            <li><a data-toggle="tab" onclick="getNegativeScrapList(durum='Beklemede')" href="#negatifHurda">Negatif Hurda Mahsuplaşma Raporu</a></li>
+                            @*<li><a data-toggle="tab" onclick="getTotalScrap(durum='Reddedildi')" href="#toplamHurda">Toplam Hurda Raporu</a></li>*@
+                        </ul>
+                    </div>
+                </div>
+
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="tab-content">
+                            @*<div id="filtreAlani" class="tab-pane fade in active">
+
+                                </div>*@
+                            <div id="hurdaMaliyet" class="tab-pane fade in active">
+                                <div style="margin-top:-15px; margin-bottom:10px;">
+
+                                    <button type='button' class='btn  btn-sm btn-default' data-toggle='modal' data-target='#hurdaMaliyetFiltreModal'>Filtre Ekle</button>
+
+                                </div>
+
+                                <table id="hurdaMaliyetTablosu" class="table table-striped table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            @*<th class="th-sm text-wrap" data-field="SCRAP_DATE">Hurda Tarihi</th>*@
+                                            @*<th class="th-sm text-wrap" data-field="uniqId" hidden="hidden">Hurda </th>*@
+                                            <th class="th-sm text-wrap" data-field="yorum" style="width:2%">Açıklama</th>
+                                            <th class="th-sm text-wrap" data-field="reason" style="width:2%">Hurda Nedeni</th>
+                                            <th class="th-sm text-wrap" data-field="bilesenId" style="width:2%">Bileşen Id</th>
+                                            @*<th class="th-sm text-wrap" data-field="machinE_ID" hidden="hidden">MakineId</th>*@
+                                            <th class="th-sm text-wrap" data-field="scrapNettingId" style="width:2%">Mahsupl. Id</th>
+
+                                            @*<th class="th-sm text-wrap" data-field="stocK_ID" style="width:4%">StokId</th>
+                                                <th class="th-sm text-wrap" data-field="trackinG_ID" style="width:4%">IzlemeId</th>*@
+                                            <th class="th-sm text-wrap" data-field="stocK_NAME" style="width:4%">Stok Ad</th>
+                                            <th class="th-sm text-wrap" data-field="trackinG_NAME" style="width:4%">Izleme Ad</th>
+                                            <th class="th-sm text-wrap" data-field="amount" style="width:3%">Miktar</th>
+                                            <th class="th-sm text-wrap" data-field="validateD_AMOUNT" style="width:3%">Valide Miktar</th>
+                                            <th class="th-sm text-wrap" data-field="unit" style="width:2%">Birim</th>
+                                            <th class="th-sm text-wrap" data-field="scraP_DATE" style="width:3%">Hurda Tarihi</th>
+                                            <th class="th-sm text-wrap" data-field="machinE_NAME" style="width:3%">Makine Ad</th>
+                                            <th class="th-sm text-wrap" data-field="mudurlukAdi" style="width:3%">Müdürlük</th>
+                                            <th class="th-sm text-wrap" data-field="birimMaliyet" style="width:3%">Birim Maliyet</th>
+                                            <th class="th-sm text-wrap" data-field="toplamMaliyet" style="width:3%">Toplam Maliyet</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="hurdaMaliyetList">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="negatifHurda" class="tab-pane fade">
+                                <div style="margin-top:-15px; margin-bottom:10px;">
+
+                                    <button type='button' class='btn  btn-sm btn-default' data-toggle='modal' data-target='#hurdaNegatifFiltreModal'>Filtre Ekle</button>
+                                </div>
+
+                                <table class="table table-striped table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="th-sm text-wrap" data-field="machinE_CODE" style="width:3%">Mak. Kod</th>
+                                            <th class="th-sm text-wrap" data-field="machinE_NAME" style="width:4%">Makine Ad</th>
+                                            <th class="th-sm text-wrap" data-field="mudurlukAdi" style="width:4%">Müdürlük</th>
+                                            <th class="th-sm text-wrap" data-field="stockName" style="width:4%">Stok Adı</th>
+
+                                            <th class="th-sm text-wrap" data-field="trackingName" style="width:5%">İzleme Ad</th>
+                                            <th class="th-sm text-wrap" data-field="negatifDeger" style="width:5%">Miktar</th>
+                                            <th class="th-sm text-wrap" data-field="unit" style="width:3%">Birim</th>
+                                            <th class="th-sm text-wrap" style="width:4%"></th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="hurdaNegatifList">
+                                    </tbody>
+                                </table>
+                            </div>
+                            @*<div id="toplamHurda" class="tab-pane fade">
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="hurdaMaliyetFiltreModal" tabindex="-1" role="dialog" aria-labelledby="hurdaMaliyetFiltreModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-12" style="padding-left:30px;">
+                        <label class="font-weight-bold">Müdürlük Seçiniz</label>
+                        <div id="checkBoxListMudurluk" style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:20px;">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12">
+                        <label class="font-weight-bold">Makine Seçiniz</label>
+                        <div id="checkBoxListMachines" style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:20px;">
+                        </div>
+                        @*<label class="checkboxContainerS">
+                                One
+                                <input type="checkbox" checked="checked">
+                                <span class="checkmark"></span>
+                            </label> *@
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12">
+                        <label class="font-weight-bold">Tarih Seçiniz</label>
+                        <div style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:20px;">
+
+
+                            <div class="form-group">
+                                <label class="font-normal">Başlangıç Tarihi</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="ScrapStartDate" name="ScrapStartDate" type="date" required="required" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">Bitiş Tarihi</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="ScrapEndDate" name="ScrapEndDate" type="date" required="required" class="form-control">  @*data-date-format="dd/mm/yyyy"*@
+                                </div>
+                            </div>
+                            <button id="btnHurdaMaliyetGetr" type="button" class="btn btn-danger btn-block" onclick="getScrapCostList()">Filtrele</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn  btn-sm btn-secondary pull-left' data-dismiss='modal'>Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="hurdaNegatifFiltreModal" tabindex="-1" role="dialog" aria-labelledby="hurdaNegatifFiltreModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-12" style="padding-left:30px;">
+                        <label class="font-weight-bold">Müdürlük Seçiniz</label>
+                        <div id="checkBoxListMudurlukNegatif" style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:20px;">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12">
+                        <label class="font-weight-bold">Makine Seçiniz</label>
+                        <div id="checkBoxListMachinesNegatif" style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:20px;">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-12">
+                        <label class="font-weight-bold">Tarih Seçiniz</label>
+                        <div style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:20px;">
+
+
+                            <div class="form-group">
+                                <label class="font-normal">Başlangıç Tarihi</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="ScrapStartDateNegatif" name="ScrapStartDateNegatif" type="date" required="required" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">Bitiş Tarihi</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="ScrapEndDateNegatif" name="ScrapEndDateNegatif" type="date" required="required" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">Eksi değeri belirleyiniz</label>
+                                <input id="txtNegatifDegerValue" type="number" class="text-info" />
+
+                            </div>
+                            <button id="btnHurdaNegatifRaporFiltrele" type="button" class="btn btn-danger btn-block" onclick="getNegatifHurdaRapor()">Filtrele</button>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn  btn-sm btn-secondary pull-left' data-dismiss='modal'>Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="malzemeDetayGetirModal" tabindex="-1" role="dialog" aria-labelledby="malzemeDetayGetirModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:10px;">
+                    <h2>Seçtiğiniz tarih aralığındaki veriler yeşil renkle gösterilmiştir.</h2>
+                    <br />
+                    <table class="table table-bordered" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="th-sm text-wrap" data-field="scrapNettingId" style="width:3%">Mhsupl. Id</th>
+                                <th class="th-sm text-wrap" data-field="stockName" style="width:5%">Stok Ad</th>
+                                <th class="th-sm text-wrap" data-field="trackingName" style="width:5%">İzleme Adı</th>
+
+                                <th class="th-sm text-wrap" data-field="processAmount" style="width:5%">Proses Hurdası</th>
+                                <th class="th-sm text-wrap" data-field="technicalScrapAmount" style="width:4%">TF ve Fire</th>
+                                <th class="th-sm text-wrap" data-field="nettingNagetiveAmount" style="width:3%">Önceki Kalan</th>
+                                <th class="th-sm text-wrap" data-field="finalAmountAfterNetting" style="width:3%">Son Miktar</th>
+                                <th class="th-sm text-wrap" data-field="unit" style="width:3%">Birim</th>
+                                <th class="th-sm text-wrap" data-field="createdDate" style="width:3%">Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody id="malzemeDetayList">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn  btn-sm btn-secondary pull-left' data-dismiss='modal'>Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="malzemeDetayIsEmirleriGetirModal" tabindex="-1" role="dialog" aria-labelledby="malzemeDetayIsEmirleriGetirModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div style="width:100%; height:400px; overflow-y: auto; border:1px #dbd8d8 solid; padding:10px;">
+                    <table class="table table-striped table-bordered" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="th-sm text-wrap" data-field="workOrderNo" style="width:5%">İş Emri No</th>
+                                <th class="th-sm text-wrap" data-field="urunStokAd" style="width:5%">Ürün Stok Ad</th>
+
+                                <th class="th-sm text-wrap" data-field="urunIzlemeAd" style="width:5%">Ürün İzleme Ad</th>
+                                <th class="th-sm text-wrap" data-field="uretilenMiktar" style="width:5%">Üretilen Miktar</th>
+                                <th class="th-sm text-wrap" data-field="stocK_NAME" style="width:3%">Malzeme Stok Ad</th>
+                                <th class="th-sm text-wrap" data-field="trackinG_NAME" style="width:3%">Mazleme İzleme Ad</th>
+                                <th class="th-sm text-wrap" data-field="amount" style="width:3%">Hurda Miktarı</th>
+                                <th class="th-sm text-wrap" data-field="unit" style="width:3%">Birim</th>
+                                <th class="th-sm text-wrap" data-field="reason" style="width:3%">Hurda Nedeni</th>
+                                <th class="th-sm text-wrap" data-field="scraP_DATE" style="width:3%">Hurda Tarihi</th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="malzemeDetayIsEmirleriList">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn  btn-sm btn-secondary pull-left' data-dismiss='modal'>Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="hataModal" tabindex="-1" role="dialog" aria-labelledby="hataModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="hataModalLongTitle">UYARI</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Tamam</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="padding:30px; text-align:center;">
+            <h3>Lütfen Bekleyiniz</h3>
+            <br />
+            <img src="~/_content/Mikroportal.UI/Images/loadingRed.gif" />
+
+        </div>
+    </div>
+</div>
+
+@*<div>
+    @{
+              string rootUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value.ToString()}";
+              if (rootUrl.Contains("localhost"))
+              {
+                 @rootUrl="http://localhost:53143";
+              }
+              else
+              {
+        <a href="@rootUrl/Dashboard/Index"><img class="logo" alt="image" src="~/_content/Mikroportal.UI/Images/logowhite.png" /></a>
+              }
+        <label id="rootUrl" class="overflow-hidden">@rootUrl</label>
+    }
+</div>*@
+
+<script>
+    //$("#btnHurdaMaliyetGetr").click(function () {
+    //    getScrapCostList();
+    //});
+    $(document).ready(function () {
+        // $("img").load(function(){
+        //alert("Image loaded.");
+        // });
+
+        getMachines();
+        getMudurlukler();
+
+        //$("#txtNegatifDegerValue").val() = "0";
+    });
+
+
+    function getScrapCostList(data) {
+        var checkBoxListMudurluk = '';
+        var checkBoxListMachines = '';
+
+        $('#checkBoxListMudurluk input[type=checkbox]').each(function () {
+            if (this.checked) {
+                checkBoxListMudurluk += $(this).val() + ',';
+
+            }
+        });
+        //console.log(checkBoxListMudurluk);
+
+        $('#checkBoxListMachines input[type=checkbox]').each(function () {
+            if (this.checked) {
+                checkBoxListMachines += $(this).val() + ',';
+
+            }
+        });
+
+        if (checkBoxListMachines.length == 0 && checkBoxListMudurluk.length == 0) {
+            alert("Müdürlük veya makine seçiminden birini yapmalısınız.");
+            return;
+        }
+
+        if ($("#ScrapStartDate").val() == null || $("#ScrapStartDate").val() == "") {
+            alert("Lütfen hurda raporu için başlangıç tarihi seçiniz.");
+            return;
+        }
+
+        if ($("#ScrapEndDate").val() == null || $("#ScrapEndDate").val() == "") {
+            alert("Lütfen hurda raporu için bitiş tarihi seçiniz.");
+            return;
+        }
+
+        checkBoxListMudurluk = checkBoxListMudurluk.substring(0, checkBoxListMudurluk.length - 1);
+
+        checkBoxListMachines = checkBoxListMachines.substring(0, checkBoxListMachines.length - 1);
+        //console.log(checkBoxListMachines);
+
+        $('#hurdaMaliyetList').text("");
+       
+
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: "{\"baslangicTarihi\":\"" + $("#ScrapStartDate").val() + "\",\"bitisTarihi\":\"" + $("#ScrapEndDate").val() + "\",\"selectedMakineListesi\":\"" + checkBoxListMachines + "\",\"selectedMudurlukListesi\":\"" + checkBoxListMudurluk + "\"}",
+            //data: '{ "baslangicTarihi": $("#ScrapStartDate").val(), "bitisTarihi": $("#ScrapEndDate").val(), "selectedMakineListesi": "3,4,5", "selectedMudurlukListesi": "2"}',
+            beforeSend: function () {
+                $('#loadingModal').modal('show');
+            },
+            url: "@ViewBag.UrlPath/api/Scrap/HurdaMaliyetRaporuGetir",
+            success: function (data) {
+                //console.log(data.hurdaMaliyetRaporList);
+
+                var tr;
+                $(data.hurdaMaliyetRaporList).each(function (index, element) {
+                    
+                    var date = new Date(element.scraP_DATE);
+                    var month = date.getMonth() + 1;
+
+                    tr = "<tr row='" + element.uniqId + "' class='read'>";
+                    tr += "<td>" + element.yorum + "</td>";
+                    tr += "<td>" + element.reason + "</td>";
+                    //if (element.bilesenId == null || element.bilesenId == undefined) {
+                    //    element.bilesenId = '';
+
+                    tr += "<td>" + element.bilesenId + "</td>";
+                    //tr += "<td>" + element.machinE_ID + "</td>";
+                    tr += "<td>" + element.scrapNettingId + "</td>";
+
+                    //tr += "<td>" + element.stocK_ID + "</td>";
+                    //tr += "<td>" + element.trackinG_ID + "</td>";
+                    tr += "<td>" + element.stocK_NAME + "</td>";
+                    tr += "<td>" + element.trackinG_NAME + "</td>";
+                    tr += "<td>" + element.amount + "</td>";
+                    tr += "<td>" + element.validateD_AMOUNT + "</td>";
+                    tr += "<td>" + element.unit + "</td>";
+                    tr += "<td>" + (parseInt(date.getDate()) < 10 ? "0" + date.getDate() : date.getDate()) + "/" + (month.toString().length > 1 ? month : "0" + month) + "/" + date.getFullYear() + "</td>";
+
+                    tr += "<td>" + element.machinE_NAME + "</td>";
+                    tr += "<td>" + element.mudurlukAdi + "</td>";
+                    tr += "<td>" + element.birimMaliyet + "</td>";
+                    tr += "<td>" + element.toplamMaliyet + "</td>";
+
+                    //tr += "<td class='text-right mail-date'>" + element.serviceDate + "</td>";
+                    //tr += "<td><button onclick='inboxDetail(" + element.machineryServiceId + ")' type='button' class='btn  btn-sm btn-default' data-toggle='modal' data-target='#inboxDetailInstallationModal'>Detay</button></td>";
+                    tr += "</tr>";
+                    $('#hurdaMaliyetList').append(tr);
+                });
+
+
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#loadingModal').modal('hide');
+                    $('#hurdaMaliyetFiltreModal').modal('hide');
+                }, 1000);
+            },
+            error: function (e) {
+                $("#hataModal").modal("show");
+                $("#hataModal .modal-body").text(" Veri getirilemedi. Lütfen arama kriterinizi kontrol ediniz");
+
+            },
+            cache: false
+        });
+
+    }
+
+    function getMachines(data) {
+        $('#checkBoxListMachines').text("");
+        $('#checkBoxListMachinesNegatif').text("");
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewBag.UrlPath/api/Scrap/GetAllMachines",
+            success: function (data) {
+                var label;
+                $(data.machineList).each(function (index, element) {
+                    label = "<label class='checkboxContainerS'>";
+                    label += element.machineName;
+                    label += " <input type='checkbox' value='" + element.id + "'><span class='checkmark'></span>"
+
+                    label += " </label>";
+                    $('#checkBoxListMachines').append(label);
+                    $('#checkBoxListMachinesNegatif').append(label);
+                });
+            },
+            error: function (e) {
+            },
+            cache: false
+        });
+
+    }
+
+    function getMudurlukler(data) {
+        $('#checkBoxListMudurluk').text("");
+        $('#checkBoxListMudurlukNegatif').text("");
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewBag.UrlPath/api/Scrap/GetAllMudurluk",
+            success: function (data) {
+                var label;
+                $(data.mudurlukList).each(function (index, element) {
+                    label = "<label class='checkboxContainerS'>";
+                    label += element.mudurlukAdi;
+                    label += " <input type='checkbox' value='" + element.mudurlukId + "'><span class='checkmark'></span>"
+
+                    label += " </label>";
+                    $('#checkBoxListMudurluk').append(label);
+                    $('#checkBoxListMudurlukNegatif').append(label);
+                });
+            },
+            error: function (e) {
+            },
+            cache: false
+        });
+
+    }
+
+
+    function getNegatifHurdaRapor(data) {
+
+        var checkBoxListMudurluk = '';
+        var checkBoxListMachines = '';
+
+        $('#checkBoxListMudurlukNegatif input[type=checkbox]').each(function () {
+            if (this.checked) {
+                checkBoxListMudurluk += $(this).val() + ',';
+            }
+        });
+        //console.log(checkBoxListMudurluk);
+
+        $('#checkBoxListMachinesNegatif input[type=checkbox]').each(function () {
+            if (this.checked) {
+                checkBoxListMachines += $(this).val() + ',';
+            }
+        });
+
+        if (checkBoxListMachines.length == 0 && checkBoxListMudurluk.length == 0) {
+            alert("Müdürlük veya makine seçiminden birini yapmalısınız.");
+            return;
+        }
+
+        if ($("#ScrapStartDateNegatif").val() == null || $("#ScrapStartDateNegatif").val() == "") {
+            alert("Lütfen rapor için başlangıç tarihi seçiniz.");
+            return;
+        }
+
+        if ($("#ScrapEndDateNegatif").val() == null || $("#ScrapEndDateNegatif").val() == "") {
+            alert("Lütfen rapor için bitiş tarihi seçiniz.");
+            return;
+        }
+
+        checkBoxListMudurluk = checkBoxListMudurluk.substring(0, checkBoxListMudurluk.length - 1);
+
+        checkBoxListMachines = checkBoxListMachines.substring(0, checkBoxListMachines.length - 1);
+
+
+        if ($("#txtNegatifDegerValue").val() == null || $("#txtNegatifDegerValue").val() == "") {
+            alert("Lütfen negatif hurda raporu için filtre değeri giriniz.");
+            return;
+        }
+
+        if ($("#txtNegatifDegerValue").val() > 0) {
+            alert("Lütfen negatif bir değer giriniz.");
+            return;
+        }
+
+        $('#hurdaNegatifList').text("");
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: "{\"negatifValue\":" + $("#txtNegatifDegerValue").val() + ",\"baslangicTarihi\":\"" + $("#ScrapStartDateNegatif").val() + "\",\"bitisTarihi\":\"" + $("#ScrapEndDateNegatif").val() + "\",\"selectedMakineListesi\":\"" + checkBoxListMachines + "\",\"selectedMudurlukListesi\":\"" + checkBoxListMudurluk + "\"}",
+            beforeSend: function () {
+                $('#loadingModal').modal('show');
+            },
+            url: "@ViewBag.UrlPath/api/Scrap/HurdaNegatifeDusenlerRaporuGetir",
+            success: function (data) {
+
+                var tr;
+                $(data.hurdaNegatifRaporList).each(function (index, element) {
+
+                    tr = "<tr row='" + element.uniqId + "' class='read'>";
+                    tr += "<td>" + element.machinE_CODE + "</td>";
+                    tr += "<td>" + element.machinE_NAME + "</td>";
+                    tr += "<td>" + element.mudurlukAdi + "</td>";
+                    tr += "<td>" + element.stockName + "</td>";
+                    tr += "<td>" + element.trackingName + "</td>";
+                    tr += "<td>" + element.negatifDeger + "</td>";
+                    tr += "<td>" + element.unit + "</td>";
+                    tr += "<td><button onclick='malzemeDetayGetir(" + element.stockId + "," + element.trackingId + "," + element.machineId + ")' type='button' class='btn  btn-sm btn-default' data-toggle='modal' data-target='#malzemeDetayGetirModal'>Detay</button></td>";
+                    tr += "</tr>";
+                    $('#hurdaNegatifList').append(tr);
+                });
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#loadingModal').modal('hide');
+                    $('#hurdaNegatifFiltreModal').modal('hide');
+                }, 1000);
+            },
+            error: function (e) {
+            },
+            cache: false
+        });
+    }
+    function malzemeDetayGetir(stockId, trackingId, machineId) {
+        $('#malzemeDetayList').text("");
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: "{\"stockId\":" + stockId + ",\"trackingId\":" + trackingId + ",\"machineId\":" + machineId + "}",
+            beforeSend: function () {
+                $('#loadingModal').modal('show');
+            },
+            url: "@ViewBag.UrlPath/api/Scrap/HurdaNegatifDetayGetir",
+            success: function (data) {
+
+                var tr;
+                $(data.hurdaNegatifDetayList).each(function (index, element) {
+ //|| element.createdDate==$("#ScrapStartDateNegatif").val() || element.createdDate< $("#ScrapEndDateNegatif").val()
+                    var date = new Date(element.createdDate);
+                    var month = date.getMonth() + 1;
+
+                    //var date2 = new Date();
+                    //var month2 = date.getMonth();
+                    //var day2 = date.getDate();
+                    //var year2 = date.getFullYear();
+                    //console.log(month + "/" + day + "/" + year);
+                    //var date2 = new Date(element.createdDate);
+
+                    //if ( > $("#ScrapStartDateNegatif").val())
+                    //    tr = "<tr class='bg-info text-white-50' row='" + element.scrapNettingId + "' >";
+                    //else
+                    //    tr = "<tr class='bg-success text-black-50' row='" + element.scrapNettingId + "' >";
+                    //console.log($("#ScrapStartDateNegatif").val());
+                    if (element.createdDate > $("#ScrapStartDateNegatif").val() && element.createdDate < $("#ScrapEndDateNegatif").val())
+                      tr = "<tr class='bg-info text-black-50 ' row='" + element.scrapNettingId + "' >";
+                    else
+                          tr = "<tr class='bg-light text-white-50 ' row='" + element.scrapNettingId + "' >";
+
+                    tr += "<td>" + element.scrapNettingId + "</td>";
+                    tr += "<td>" + element.stockName + "</td>";
+                    tr += "<td>" + element.trackingName + "</td>";
+                    tr += "<td>" + element.processAmount + "</td>";
+                    if (element.createdDate > $("#ScrapStartDateNegatif").val() && element.createdDate < $("#ScrapEndDateNegatif").val())
+                        tr += "<td><a href='#malzemeDetayIsEmirleriGetirModal'  onclick='malzemeDetayIsEmirleriGetir(" + element.scrapNettingId + ")' data-toggle='modal' data-target='#malzemeDetayIsEmirleriGetirModal' style='color:#fff; text-decoration: underline;'>" + element.technicalScrapAmount + "</a></td>";
+                    else
+                          tr += "<td><a href='#malzemeDetayIsEmirleriGetirModal'  onclick='malzemeDetayIsEmirleriGetir(" + element.scrapNettingId + ")' data-toggle='modal' data-target='#malzemeDetayIsEmirleriGetirModal' style='color:#000; text-decoration: underline;'>" + element.technicalScrapAmount + "</a></td>";
+                    tr += "<td>" + element.nettingNagetiveAmount + "</td>";
+                    tr += "<td>" + element.finalAmountAfterNetting + "</td>";
+                    tr += "<td>" + element.unit + "</td>";
+                    //tr += "<td>" + element.createdDate + "</td>";
+                    tr += "<td>" + (parseInt(date.getDate()) < 10 ? "0" + date.getDate() : date.getDate()) + "/" + (month.toString().length > 1 ? month : "0" + month) + "/" + date.getFullYear() + "</td>";
+
+                    tr += "</tr>";
+                    $('#malzemeDetayList').append(tr);
+                });
+            },
+              complete: function () {
+                setTimeout(function () {
+                    $('#loadingModal').modal('hide');
+                }, 1000);
+            },
+            error: function (e) {
+            },
+            cache: false
+        });
+    }
+
+    function malzemeDetayIsEmirleriGetir(scrapNettingId) {
+
+        $('#malzemeDetayIsEmirleriList').text("");
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+            data: "{\"scrapNettingId\":" + scrapNettingId + "}",
+             beforeSend: function () {
+                $('#loadingModal').modal('show');
+            },
+            url: "@ViewBag.UrlPath/api/Scrap/HurdaNegatiftekiIsEmirleriGetir",
+            success: function (data) {
+
+                var tr;
+                $(data.hurdaNegatiftekiIsEmirleriList).each(function (index, element) {
+
+                    var date = new Date(element.scraP_DATE);
+                    var month = date.getMonth() + 1;
+
+                    tr = "<tr row='" + element.uniqId + "' >";
+                    tr += "<td>" + element.workOrderNo + "</td>";
+                    tr += "<td>" + element.urunStokAd + "</td>";
+                    tr += "<td>" + element.urunIzlemeAd + "</td>";
+                    tr += "<td>" + element.uretilenMiktar + "</td>";
+                    tr += "<td>" + element.stocK_NAME + "</td>";
+                    tr += "<td>" + element.trackinG_NAME + "</td>";
+                    tr += "<td>" + element.amount + "</td>";
+                    tr += "<td>" + element.unit + "</td>";
+                    tr += "<td>" + element.reason + "</td>";
+                    tr += "<td>" + (parseInt(date.getDate()) < 10 ? "0" + date.getDate() : date.getDate()) + "/" + (month.toString().length > 1 ? month : "0" + month) + "/" + date.getFullYear() + "</td>";
+
+                    tr += "</tr>";
+                    $('#malzemeDetayIsEmirleriList').append(tr);
+                });
+            },
+             complete: function () {
+                setTimeout(function () {
+                    $('#loadingModal').modal('hide');
+                }, 1000);
+            },
+            error: function (e) {
+            },
+            cache: false
+        });
+    }
+</script>

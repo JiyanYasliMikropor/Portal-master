@@ -1,0 +1,184 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["PageName"];
+    ViewData["LanguageSelection"] = Localizer["LanguageSelection"];
+    ViewData["Welcome"] = Localizer["Welcome"];
+    ViewData["LogOut"] = Localizer["LogOut"];
+    Layout = "_LayoutACSService";
+
+}
+
+@*<script>
+        var SessionDurum = '@HttpContextAccessor.HttpContext.Session.GetString("SessionDurum")';
+        if (SessionDurum == "Aktif") {
+            setTimeout(function () {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.success('@ViewData["Welcome"]', '@ViewData["Title"]');
+
+            }, 1300);
+        }
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: null,
+                url: "/api/SSHGeneral/ChangeSesion",
+                success: function (data) {
+
+                },
+                error: function (e) {
+
+                },
+                cache: false
+            });
+    </script>*@
+<style>
+    .product-desc .small.m-t-xs {
+        min-height: 50px;
+    }
+    .product-imitation .index-img {
+        width: 200px;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Satış Sonrası Hizmetler</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="AdminHome">Anasayfa</a>
+            </li>
+            <li class="active">
+                <strong>Satış Sonrası Hizmetler</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="ibox">
+                <div class="ibox-content product-box">
+                    <div class="product-imitation">
+                        <img class="index-img" alt="image" src="~/_content/Mikroportal.UI/Images/2.png" />
+                    </div>
+                    <div class="product-desc">
+                        <div class="product-name">   @Localizer["SparePart"]</div>
+                        <div class="small m-t-xs">
+                            @Localizer["SparePartComment"]
+                        </div>
+                        <div class="m-t text-center">
+
+                            <div class="m-t-sm">
+                                @if (User.IsInRole("ACSServiceYedekParca"))
+                                {
+                                    <a asp-action="Index" asp-controller="ReplacementPart" class="btn-default btn-sm"><i class="fa fa-puzzle-piece" aria-hidden="true"></i> @Localizer["SparePart"]</a>
+                                }
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="ibox">
+                <div class="ibox-content product-box">
+                    <div class="product-imitation">
+                        <img class="index-img" alt="image" src="~/_content/Mikroportal.UI/Images/4.png" />
+                    </div>
+                    <div class="product-desc">
+                        <div class="product-name">    @Localizer["Service"]</div>
+                        <div class="small m-t-xs">
+                            @Localizer["ServiceComment"]
+                        </div>
+                        <div class="m-t text-center">
+
+                            <div class="m-t-sm">
+                                <a asp-action="Index" asp-controller="Installation" class="btn-default btn-sm"><i class="fa fa-cloud-upload"></i>   @Localizer["Installation"]</a>
+                                |
+                                <a asp-action="Index" asp-controller="Replacement" class="btn-default btn-sm"><i class="fa fa-refresh"></i>   @Localizer["Replacement"]</a>
+                                |
+                                <a asp-action="Index" asp-controller="RepairAndMaintenance" class="btn-default btn-sm"><i class="fa fa-cog"></i>   @Localizer["RepairAndMaintenance"]</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="ibox">
+                <div class="ibox-content product-box">
+                    <div class="product-imitation">
+                        <img class="index-img" alt="image" src="~/_content/Mikroportal.UI/Images/3.png" />
+                    </div>
+                    <div class="product-desc">
+                        <div class="product-name">@Localizer["TechnicalSupport"]</div>
+                        <div class="small m-t-xs">
+                            @Localizer["TechnicalSupportComment"]
+                        </div>
+                        <div class="m-t text-center">
+
+                            <div class="m-t-sm">
+                                <a asp-action="Index" asp-controller="CallCenter" class="btn-default btn-sm"><i class="fa fa-cog"></i>   @Localizer["CallCenter"]</a>
+
+                                @if (User.IsInRole("ACSServiceTekinkDokuman"))
+                                {
+                                    <a id="DocumentIsActive" asp-action="Index" asp-controller="TechnicalDocument" class="btn-default btn-sm"><i class="fa fa-arrows-h"></i>  @Localizer["TechnicalDocument"]</a>
+                                }
+
+
+
+                                @*@{
+                                        if (@HttpContextAccessor.HttpContext.Session.GetInt32("SessionDocumentIsActive") == 1)
+                                        {
+                                            <a id="DocumentIsActive" asp-action="Index" asp-controller="TechnicalDocument" class="btn-default btn-xs"><i class="fa fa-arrows-h"></i>  @Localizer["TechnicalDocument"]</a>
+                                        }
+                                    }*@
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if (ViewBag.Success == true)
+{
+    <script type="text/javacsript">
+
+        toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        showMethod: 'slideDown',
+        timeOut: 4000
+        };
+        toastr.success('@ViewBag.Message');
+    </script>
+}
+else if (ViewBag.Success == false)
+{
+    <script type="text/javacsript">
+        toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        showMethod: 'slideDown',
+        timeOut: 4000
+        };
+        toastr.error('@ViewBag.Message');
+    </script>
+}

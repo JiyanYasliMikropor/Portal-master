@@ -1,0 +1,122 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization;
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    .ibox-title h5 .fa {
+        margin-right: 8px;
+    }
+</style>
+
+@inject  IViewLocalizer Localizer 
+
+<div class="wrapper wrapper-content">
+
+    <div class="row">
+        <div class="col-md-10 col-sm-7">
+
+        </div>
+        <div class="col-md-2 col-sm-5">
+            @*<div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <a href="~/StaticFiles/FoodList/EYLUL-2020-MENU.xlsx" download class="btn btn-xs btn-primary btn-gri pull-right"><i class="fa fa-download" aria-hidden="true"></i></a>
+                    <h5><i class="fa fa-cutlery" aria-hidden="true"></i>Yemek Listesi</h5>
+                </div>
+                <div class="ibox-title">
+                    <button type="button" data-toggle="modal" data-target="#sunumFormati" class="btn btn-xs btn-gri btn-primary pull-right"><i class="fa fa-download" aria-hidden="true"></i></button>
+                    <h5><i class="fa fa-file-image-o" aria-hidden="true"></i>Sunum Formatı</h5>
+                </div>
+                <div class="ibox-title">
+                    <button type="button" data-toggle="modal" data-target="#telefonRehberi" class="btn btn-xs btn-gri btn-primary pull-right"><i class="fa fa-download" aria-hidden="true"></i></button>
+                    <h5><i class="fa fa-address-book-o" aria-hidden="true"></i>Telefon Rehberi</h5>
+                </div>
+                <div class="ibox-title">
+                    <a href="http://192.168.2.18:8085/mes2/account/login" class="btn btn-xs btn-primary btn-gri pull-right"><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+                    <h5><i class="fa fa-plus-square" aria-hidden="true"></i>Yıllık İzin</h5>
+                </div>
+            </div>
+            <div class="row"></div>
+            <div class="ibox float-e-margins">
+                <div class="slick_demo_1">
+
+                    <div>
+                        <div class="ibox-content">
+                            <h2>Slide 1</h2>
+                            <p>
+                                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
+                                Ipsum has been the industry's standard dummy text ever since the 1500s, when an
+                                unknown printer took a galley of type and scrambled it to make a type specimen
+                                book. It has survived not only five centuries, but also the leap.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="ibox-content">
+                            <h2>Slide 2</h2>
+                            <p>
+                                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
+                                Ipsum has been the industry's standard dummy text ever since the 1500s, when an
+                                unknown printer took a galley of type and scrambled it to make a type specimen
+                                book. It has survived not only five centuries, but also the leap.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="ibox-content">
+                            <h2>Slide 3</h2>
+                            <p>
+                                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
+                                Ipsum has been the industry's standard dummy text ever since the 1500s, when an
+                                unknown printer took a galley of type and scrambled it to make a type specimen
+                                book. It has survived not only five centuries, but also the leap.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sunumFormati" tabindex="-1" role="dialog" aria-labelledby="sunumFormatiLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sunumFormatiLabel">Sunum Formatı</h5>
+            </div>
+            <div class="modal-body">
+                <a href="~/StaticFiles/PresentationFormat/Mikropor-Kurumsal-PPT-Template-TR.pptx" download>- Kurumsal Sunum Formatı</a><br />
+                <a href="~/StaticFiles/PresentationFormat/Mikropor-Kurumsal-PPT-Template-EN.pptx" download>- Corporate Presentation Template</a>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Çıkış</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="telefonRehberi" tabindex="-1" role="dialog" aria-labelledby="telefonRehberiLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="telefonRehberiLabel">Telefon Rehberi</h5>
+            </div>
+            <div class="modal-body">
+                <a href="~/StaticFiles/PhoneDirectory/Rehber1.pdf" download>- Telefon Rehberi 1</a><br />
+                <a href="~/StaticFiles/PhoneDirectory/Rehber2.pdf" download>- Telefon Rehberi 2</a>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Çıkış</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('.slick_demo_1').slick({
+            dots: true
+        });
+    });
+
+</script>

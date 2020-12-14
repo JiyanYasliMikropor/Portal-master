@@ -1,0 +1,566 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["PageName"];
+    ViewData["LanguageSelection"] = Localizer["LanguageSelection"];
+    ViewData["Welcome"] = Localizer["Welcome"];
+    ViewData["LogOut"] = Localizer["LogOut"];
+    Layout = "_LayoutACSService";
+
+}
+<style>
+    .file {
+        position: relative;
+        background: linear-gradient(to right, lightblue 50%, transparent 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        transition: all 1s ease;
+    }
+
+    .file {
+        border: 1px solid #e7eaec;
+        padding: 0;
+        background-color: #ffffff;
+        position: relative;
+        margin-bottom: 2px;
+        margin-right: 100px;
+    }
+
+        .file.done {
+            background: #1ab394;
+        }
+
+        .file a {
+            display: block;
+            position: relative;
+            padding: 4px 9px;
+            text-align: left;
+            color: #424242;
+            font-size: 10px;
+        }
+
+
+    .fileList {
+        margin: 15px 0px;
+    }
+
+        .fileList .btn-xs {
+            float: right;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+
+    .file {
+        margin-right: 10px;
+    }
+
+    .removeFile {
+        position: absolute;
+        right: 15px;
+        top: 6px;
+        z-index: 999;
+    }
+
+    .attachment {
+        list-style: none;
+        float: left;
+        margin-left: 0px;
+        padding-left: 15px;
+    }
+
+        .attachment .file-box {
+            position: relative;
+        }
+
+    .file-box {
+        float: left;
+    }
+
+    .mail-attachment {
+        border-top: 1px solid #dedede;
+        padding: 20px 0px;
+        font-size: 12px;
+    }
+
+    .attachment {
+        list-style: none;
+        float: left;
+        margin-left: 0px;
+        padding-left: 0px;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-12">
+        <h2>@Localizer["Installation"]</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="Home">@Localizer["Home"]</a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-controller="Home">@Localizer["Service"]</a>
+            </li>
+            <li class="active">
+                <strong>@Localizer["Installation"]</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content">
+
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>@Localizer["Installation"]</h5>
+
+                <span class="pull-right text-right text-danger">
+
+                    <small>@Localizer["FormValidationMessage"] </small>
+
+                </span>
+            </div>
+            <div class="ibox-content">
+                <form id="InstallationForm" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
+                    <div class="row">
+                        <div class="col-md-6 b-r">
+                            <div class="form-group" id="data_1">
+                                <label class="font-normal">@Localizer["InstallationDate"] *</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="MachineStartedDate" name="MachineStartedDate" data-date-format="dd/mm/yyyy" data-date-end-date="0d" type="text" required="required" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">@Localizer["SerialNumber"] *</label>
+                                <input id="SerialNo" name="SerialNo" type="text" required="required" class="form-control">
+                            </div>
+
+                            <button type="button" id="SerialNoCheckButton" class="ladda-button ladda-button-demo btn pull-right btn-primary" data-style="expand-right">@Localizer["Forward"]</button>
+
+                            <div class="row"></div>
+
+                            <div class="form-group hidden">
+                                <label class="font-normal">@Localizer["SkuCode"]</label>
+                                <input id="SkuCode" name="SkuCode" type="text" disabled class="form-control">
+                            </div>
+                            <div class="form-group hidden">
+                                <label class="font-normal">@Localizer["SkuName"]</label>
+                                <input id="TracingName" name="TracingName" type="text" disabled class="form-control">
+                            </div>
+                            <div class="form-group hidden">
+                                <label class="font-normal">@Localizer["CompressorInformation"] *</label>
+                                <textarea id="CompressorInformation" name="CompressorInformation" class="form-control" required="required" rows="4"></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group hidden">
+                                        <label class="font-normal">@Localizer["PersonnelName"] *</label>
+                                        <input id="StaffName" name="StaffName" type="text" required="required" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group hidden">
+                                        <label class="font-normal">@Localizer["PersonnelSurname"] *</label>
+                                        <input id="StaffLastName" name="StaffLastName" type="text" required="required" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group hidden">
+                                <label class="font-normal">@Localizer["MachineDescription"] </label>
+                                <textarea id="MachineComment" name="MachineComment" class="form-control" rows="2"></textarea>
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-md-6 hidden">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p>@Localizer["CustomerInformation"]</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">@Localizer["CompanyName"] *</label>
+                                <input id="CompanyName" name="CompanyName" type="text" required="required" class="form-control">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-normal">@Localizer["ContactName"] *</label>
+                                        <input id="RelatedPersonName" name="RelatedPersonName" required="required" type="text" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-normal">@Localizer["ContactNameSurname"] *</label>
+                                        <input id="RelatedPersonLastName" name="RelatedPersonLastName" required="required" type="text" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">@Localizer["E-mail"]</label>
+                                <input id="RelatedPersonEmail" name="RelatedPersonEmail" type="email" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">@Localizer["Title"]</label>
+                                <input id="RelatedPersonTitle" name="RelatedPersonTitle" type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">@Localizer["Phone"]</label>
+                                <input id="RelatedPersonPhone" name="RelatedPersonPhone" type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">@Localizer["Address"] </label>
+                                <textarea id="CompanyAdress" name="CompanyAdress" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-normal">@Localizer["CustomerDescription"] </label>
+                                <textarea id="Comment" name="Comment" class="form-control" rows="2"></textarea>
+                            </div>
+
+                            <input id="ModelNoData" name="ModelNoData" type="hidden">
+                        </div>
+                        <div class="row"></div>
+                        <div class="col-md-12 hidden">
+                            <br />
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <a href="~/../../../StaticFiles/ACS/WCF.xlsx" download>
+                                        <span type="button" class="btn btn-xs btn-primary"><i class="fa fa-download" aria-hidden="true"></i></span>
+                                        Warranty Claim Form
+
+                                    </a>
+                                </div>
+                            </div>
+
+                            <br />
+                            <div class="form-group files hidden">
+                                <label class="font-normal">@Localizer["ChooseFiles"]</label>
+                                <input type="file" id="files" name="files" multiple>
+                            </div>
+
+                            <div class="row">
+                                <ul class="attachment">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row"></div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <a asp-action="Index" asp-controller="Home" class="btn btn-white">@Localizer["Cancel"]</a>
+                                @*<button id="AddMachine" type="submit" value="AddMachine" formaction="Installation/AddMachine" formmethod="post" class="btn btn-primary hidden">@Localizer["Save"]</button>*@
+                                <button id="AddMachine" type="button" class="ladda-button ladda-button-demo btn pull-right btn-primary hidden" data-style="expand-right">@Localizer["Save"]</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="modal inmodal" id="ServisYonlendirmeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeIn">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">@Localizer["Close"]</span></button>
+                <i class="fa  fa-exclamation-triangle modal-icon"></i>
+                <h4 class="modal-title">@Localizer["MachineInstalled"]</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    @Localizer["Choosetheactionyouwanttotake"]
+                </p>
+            </div>
+            <div class="modal-footer">
+                <a asp-action="Index" asp-controller="Replacement" class="btn-default btn-xs"><i class="fa fa-refresh"></i>   @Localizer["Replacement"]</a>
+                |
+                <a asp-action="Index" asp-controller="RepairAndMaintenance" class="btn-default btn-xs"><i class="fa fa-cog"></i> @Localizer["RepairAndMaintenance"]</a>
+                |
+                <a asp-action="Index" asp-controller="CallCenter" class="btn-default btn-xs"><i class="fa fa-cog"></i>@Localizer["Çağrı Merkezi"]</a>
+                @*|
+                    <a href="TeknikDestek-TeknikDokuman.html" class="btn-default btn-xs"><i class="fa fa-arrows-h"></i> Teknik Doküman</a>*@
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.Success == true)
+{
+    <script type="text/javacsript">
+
+        toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-center",
+        showMethod: 'slideDown',
+        timeOut: 4000
+        };
+        toastr.success('@ViewBag.Message');
+    </script>
+}
+else if (ViewBag.Success == false)
+{
+    <script type="text/javacsript">
+        toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-center",
+        showMethod: 'slideDown',
+        timeOut: 1000
+        };
+        toastr.error('@ViewBag.Message');
+    </script>
+}
+
+<script>
+    var filesToUpload = [];
+
+    $.fn.fileUploader = function (filesToUpload, sectionIdentifier) {
+        var fileIdCounter = 0;
+
+        this.closest(".files").change(function (evt) {
+            var output = [];
+
+            for (var i = 0; i < evt.target.files.length; i++) {
+                fileIdCounter++;
+
+                var file = evt.target.files[i];
+                var fileId = sectionIdentifier + fileIdCounter;
+
+                filesToUpload.push({
+                    id: fileId,
+                    file: file
+                });
+
+                var removeLink = "<div class=\"removeFile btn btn-danger btn-xs\" data-fileid=\"" + fileId + "\"><i class='fa fa-times-circle-o' aria-hidden='true'></i></div>";
+
+                var dataContent = "";
+
+                if (file.type == "image/jpeg" || file.type == "image/png") {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='#'>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<img alt='image' class='feed-photo' src=" + (window.URL ? URL : webkitURL).createObjectURL(file) + ">" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        escape(file.name) +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                } else {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='#'>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<i class='fa fa-file'></i>" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        escape(file.name) +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                }
+
+
+                $(".attachment").append(dataContent);
+
+            };
+            //evt.target.value = null;
+        });
+
+        this.clear = function () {
+            for (var i = 0; i < filesToUpload.length; ++i) {
+                if (filesToUpload[i].id.indexOf(sectionIdentifier) >= 0)
+                    filesToUpload.splice(i, 1);
+            }
+
+            $(this).children(".fileList").empty();
+        }
+
+        return this;
+    };
+
+    (function () {
+        var files1Uploader = $("#files").fileUploader(filesToUpload, "files");
+
+    })()
+
+
+    $('body').on('click', '.removeFile', function (e) {
+        var fileId = $(this).data("fileid");
+        // loop through the files array and check if the name of that file matches FileName
+        // and get the index of the match
+        for (var i = 0; i < filesToUpload.length; ++i) {
+            if (filesToUpload[i].id === fileId)
+                filesToUpload.splice(i, 1);
+        }
+        $(this).parent().remove();
+
+        //$("#files").fileUploader(filesToUpload)
+        $("#files").attr("value", filesToUpload);
+    });
+
+
+
+
+    var currentDate = new Date();
+
+
+    $("#MachineStartedDate").datepicker({
+        todayBtn: "linked",
+        language: "tr",
+        autoclose: true,
+        todayHighlight: true,
+    });
+
+    //Seri numarasını kontrol etmek için gerekli fonksiyonlar.
+    $("#SerialNoCheckButton").on("click", function () {
+
+        var serialNo = $("#SerialNo").val();
+        if (serialNo == null || serialNo == undefined || serialNo == '') {
+            //Uyarı için gerekli fonkisiyon
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning('Seri numarası girilmemiş!');
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { serialNo: $("#SerialNo").val() },
+                url: "@ViewData["UrlPath"]/api/Installation/SerialNoCheck",
+                beforeSend: function () { $('#SerialNoCheckButton').ladda().ladda('start'); },
+                success: function (data) {
+                    if (data.isSuccess) {
+
+                        if (data.isModal == true) {
+
+                            $("#ServisYonlendirmeModal").modal("show");
+
+                        } else {
+                            $("#InstallationForm .hidden").removeClass("hidden");
+                            $("#SerialNoCheckButton").addClass("hidden");
+
+                            $("#SkuCode").val(data.machineDetail[0].skuId);
+                            $("#TracingName").val(data.machineDetail[0].sku);
+
+                        }
+
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+
+                    }
+                },
+                complete: function () { $('#SerialNoCheckButton').ladda().ladda('stop'); },
+                error: function (e) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error(e.responseJSON.message)
+                },
+                cache: false
+            });
+        }
+    });
+
+    var base_url = window.location.origin;
+
+      //Kayıt işlemleri
+    $("#AddMachine").on("click", function () {
+        $("#InstallationForm").valid();
+        var model = $('#InstallationForm').serialize();
+        var form = $("#InstallationForm");
+        if (form.valid() == true) {
+             $.ajax({
+                type: "POST",
+                dataType: 'json',
+                data: model,
+                 url: "@ViewData["UrlPath"]/api/Installation/AddMachine",
+                 beforeSend: function () { $('#AddMachine').ladda().ladda('start'); },
+                 success: function (data) {
+                     if (data.isSuccess == true) {
+                         toastr.options = {
+                             closeButton: true,
+                             progressBar: true,
+                             positionClass: "toast-top-center",
+                             showMethod: 'slideDown',
+                             timeOut: 4000
+                         };
+                         toastr.success("Kurulum yapıldı. Anasayfaya yönlendiriliyorsunuz!");
+                         setTimeout(function () { window.location.replace(base_url + '/ACS '); }, 4000);
+
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+
+                    }
+
+                 },
+                 complete: function () { $('#AddMachine').ladda().ladda('stop');  },
+            error: function (e) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.error(" Hata oluştu!! Kurulum yapılamadı..Lütfen tekrar deneyiniz..");
+
+                },
+                cache: false
+            });
+        }
+
+    });
+
+
+
+</script>

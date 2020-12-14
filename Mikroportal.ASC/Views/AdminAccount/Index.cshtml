@@ -1,0 +1,223 @@
+﻿@{
+    Layout = "_LayoutACSAdmin";
+}
+<style>
+    .contentText {
+        float: left;
+        width: 100%;
+        padding: 0px 0px 6px 0px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #efefef;
+    }
+
+    .font-normal {
+        float: left;
+        width: 100%;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Servis Yetkilendir</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="AdminHome">Anasayfa</a>
+            </li>
+            <li class="active">
+                <strong>Servis Yetkilendir</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="ibox float-e-margins" style="margin-top:15px">
+    <div class="ibox-title">
+        <h5>Servis Listesi</h5>
+    </div>
+    <div class="ibox-content">
+        <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive">
+
+            <table id="example" class="table table-striped table-bordered nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Kullanıcı</th>
+                        <th>Email</th>
+                        <th>Firma</th>
+                        <th>Durumu</th>
+                        <th>Teknik Doküman Yetkisi</th>
+                        <th>Yedek Parça Yetkisi</th>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        getInboxCount();
+        var PersonelListArr = new Array;
+        getPersonelList();
+
+        tbl = $('#example').DataTable({
+
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Turkish.json"
+            },
+            pageLength: 10,
+            scrollY: false,
+            scrollX: true,
+            data: PersonelListArr,
+            columns: [
+                { "data": "userName" },
+                { "data": "userEmail" },
+                { "data": "companyName" },
+                {
+                    "mData": null,
+                    "bSortable": false,
+                    "mRender": function (o) {
+                        var data = "";
+                        if (o.userIsActive == true) {
+                            data = '<button id="userChangeRole" data-id="'+o.userId+'" data-durum="0" data-type="UserIsActive" class="btn btn-outline btn-danger btn-sm">Pasif Et</button>';
+                        } else {
+                            data = '<button id="userChangeRole" data-id="' + o.userId +'" data-durum="1" data-type="UserIsActive" class="btn btn-outline btn-primary btn-sm">Aktif Et</button>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    "mData": null,
+                    "bSortable": false,
+                    "mRender": function (o) {
+                        var data = "";
+                        if (o.teknikDokuman == true) {
+                            data = '<button id="userChangeRole" data-id="' + o.userId +'" data-durum="0" data-type="TeknikDokuman" class="btn btn-outline btn-danger btn-sm">Pasif Et</button>';
+                        } else {
+                            data = '<button id="userChangeRole" data-id="' + o.userId +'" data-durum="1" data-type="TeknikDokuman" class="btn btn-outline btn-primary btn-sm">Aktif Et</button>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    "mData": null,
+                    "bSortable": false,
+                    "mRender": function (o) {
+                        var data = "";
+                        if (o.yedekParca == true) {
+                            data = '<button id="userChangeRole" data-id="' + o.userId +'" data-durum="0" data-type="YedekParca" class="btn btn-outline btn-danger btn-sm">Pasif Et</button>';
+                        } else {
+                            data = '<button id="userChangeRole" data-id="' + o.userId +'" data-durum="1" data-type="YedekParca" class="btn btn-outline btn-primary btn-sm">Aktif Et</button>';
+                        }
+                        return data;
+                    }
+                },
+            ],
+
+            rowReorder: {
+                selector: 'td:nth-child(5)'
+            },
+            responsive: true,
+        });
+
+
+    function getInboxCount() {
+        $('#reportListDataContent').text("");
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewData["UrlPath"]/api/AdminAccount/getInboxCount",
+            success: function (data) {
+                $(".unreadFlags").text(data.readFlagsNothingCount);
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+    }
+
+    function getPersonelList() {
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url: "@ViewData["UrlPath"]/api/AdminAccount/getPersonelList",
+            success: function (data) {
+                console.log(data);
+                if (data.isSuccess == false) {
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.warning("Hata oluştu! Lütfen tekrar deneyiniz.")
+                } else {
+                    PersonelListArr = data.personelAndRoleList;
+                    console.log(data);
+                    PersonelListDoldur();
+                    tbl.clear();
+                    tbl.rows.add(PersonelListArr);
+                    tbl.draw();
+                }
+
+            },
+            error: function (e) {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.warning("Hata oluştu! Lütfen tekrar deneyiniz.")
+
+            },
+            cache: false
+
+        });
+
+    }
+
+
+
+    function PersonelListDoldur() {
+        tbl.clear();
+        tbl.rows.add(PersonelListArr);
+        tbl.draw();
+        }
+
+        $('body').on('click', '#userChangeRole', function () {
+            var userId = $(this).data('id');
+            var durum = $(this).data('durum');
+            var type = $(this).data('type');
+
+             $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: { userId: userId, durum: durum, type: type},
+            url: "@ViewData["UrlPath"]/api/AdminAccount/userChangeRole",
+            success: function (data) {
+                getPersonelList();
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+
+        });
+
+        });
+
+
+
+        $("#AddDocumentIsActive").addClass("active");
+
+
+    });
+</script>

@@ -1,0 +1,940 @@
+﻿@{
+    Layout = "_LayoutACSAdmin";
+}
+<style>
+    .contentText {
+        float: left;
+        width: 100%;
+        padding: 0px 0px 6px 0px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #efefef;
+    }
+
+    .font-normal {
+        float: left;
+        width: 100%;
+    }
+
+    .table .form-control {
+        background-color: #FFFFFF;
+        background-image: none;
+        border: 1px solid #b5b5b5;
+        border-radius: 1px;
+        color: inherit;
+        display: block;
+        padding: 3px 3px;
+        transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+        width: 100%;
+        font-size: 11px;
+        font-weight: 600;
+        height: 24px;
+    }
+
+    .fileList {
+        margin: 15px 0px;
+    }
+
+        .fileList .btn-xs {
+            float: right;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+
+    .file {
+        margin-right: 10px;
+    }
+
+    .removeFile {
+        position: absolute;
+        right: 15px;
+        top: 6px;
+        z-index: 999;
+    }
+
+    .attachment {
+        list-style: none;
+        float: left;
+        margin-left: 0px;
+        padding-left: 15px;
+    }
+
+        .attachment .file-box {
+            position: relative;
+        }
+
+    .file-box {
+        float: left;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Makine Geçmişi</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="AdminHome">Anasayfa</a>
+            </li>
+            <li class="active">
+                <strong>Makine Geçmişi</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="ibox-content m-b-sm border-bottom">
+            <div class="row">
+                <h4 style="margin-left:15px;">Oluşturma Tarihi</h4>
+                <div class="col-md-2">
+                    <div class="form-group" id="data_1">
+                        <label class="font-normal">Baş. Tarih</label>
+                        <div class="input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input id="searchStartDate" type="text" data-date-format="dd/mm/yyyy" onChange="getInstallationReportList();" data-date-end-date="0d" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="form-group" id="data_1">
+                        <label class="font-normal">Bit. Tarih</label>
+                        <div class="input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input id="searchEndDate" data-date-format="dd/mm/yyyy" onChange="getInstallationReportList();" data-date-end-date="0d" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive">
+                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Servis Tipi
+                                            <br />
+                                            <select id="searchServicesType" onChange="getInstallationReportList();" class="form-control filter">
+                                                <option value="">Hepsi</option>
+                                                <option value="Kurulum">Kurulum</option>
+                                                <option value="Yenileme">Yenileme</option>
+                                                <option value="Tamir ve Bakım">Tamir ve Bakım</option>
+                                                <option value="Çağrı Merkezi">Çağrı Merkezi</option>
+                                                <option value="Uzatmalı Garanti">Garanti Uzatma</option>
+                                                <option value="Garanti İptali">Garanti İptali</option>
+                                            </select>
+                                        </th>
+                                        <th>Oluşturma Tarihi</th>
+                                        <th>Oluşturan Kişi</th>
+                                        <th>İşlem Tarihi</th>
+                                        <th>Seri No <br /> <input type="text" id="searchSerialNo" placeholder="Seri numarası giriniz" class="form-control filter"></th>
+                                        <th>Sku Kodu <br />  <input type="text" id="searchSkuCode" placeholder="Sku kodu giriniz" class="form-control filter"></th>
+                                        <th>Sku Adı <br /> <input type="text" id="searchTracingName" placeholder="Sku Adı giriniz" class="form-control filter"></th>
+                                        <th>Firma Adı</th>
+
+                                        <th>
+                                            Durum <br />    <select id="searchStatus" onChange="getInstallationReportList();" class="form-control filter">
+                                                <option value="">Hepsi</option>
+                                                @*<option value="Beklemede">Beklemede</option>*@
+                                                <option value="Onaylandı">Onaylandı</option>
+                                                <option value="Reddedildi">Reddedildi</option>
+                                            </select>
+                                        </th>
+                                        <th>İşlem</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportListDataContent">
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="inboxDetailInstallationModal" tabindex="-1" role="dialog" aria-labelledby="inboxDetailInstallationModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div class="mail-box-header">
+                    <h2>
+                        <span id="inboxServiceName"></span>
+                    </h2>
+                    <div class="mail-tools tooltip-demo m-t-md">
+                        <h3>
+                            <span class="font-normal">Gönderen Personel: </span><span id="inboxBy"></span>
+                        </h3>
+                        <h5>
+                            <span class="pull-right font-normal"><span id="inboxDate"></span></span>
+                            <span class="font-normal"></span><span id="inboxEmail"></span>
+                        </h5>
+                    </div>
+                </div>
+                <div class="mail-box">
+
+                    <div class="mail-body">
+                        <div class="row">
+                            <div class="col-md-6 b-r">
+                                <label class="font-normal callCenter InboxMachineStartedDateName"><strong>Çalışmaya Başladığı Tarih</strong></label>
+                                <div class="contentText callCenter InboxMachineStartedDate" id="InboxMachineStartedDate"></div>
+                                <label class="font-normal callCenter InboxDateName"><strong>Tarih</strong></label>
+                                <div class="contentText callCenter InboxDateDate" id="InboxDate"></div>
+
+                                <label class="font-normal"><strong>Seri No</strong></label>
+                                <div class="contentText" id="InboxSerialNo"></div>
+
+                                <label class="font-normal"><strong>Sku Kodu</strong></label>
+                                <div class="contentText" id="InboxSkuCode"></div>
+
+                                <label class="font-normal"><strong>Sku Adı</strong></label>
+                                <div class="contentText" id="InboxTracingName"></div>
+
+                                <label class="font-normal callCenter"><strong>Sku Kodu</strong></label>
+                                <div class="contentText callCenter" id="InboxSkuCode"></div>
+
+                                <label class="font-normal callCenter"><strong>Sku Adı</strong></label>
+                                <div class="contentText callCenter" id="InboxTracingName"></div>
+
+                                <label class="font-normal InboxCompressorInformationName"><strong>Kompresör Bilgileri</strong> </label>
+                                <div class="contentText InboxCompressorInformation" id="InboxCompressorInformation"></div>
+
+                                <label class="font-normal callCenter"><strong>Personel Bilgileri</strong> </label>
+                                <div class="contentText callCenter" id="InboxStafName"></div>
+
+
+                                <label class="font-normal callCenter"><strong>Makine Açıklaması</strong> </label>
+                                <div class="contentText callCenter" id="InboxMachineComment"></div>
+
+                                <label class="font-normal callCenter InboxCustomerComplaintName"><strong>Müşteri Şikayeti</strong> </label>
+                                <div class="contentText callCenter InboxCustomerComplaint" id="InboxCustomerComplaint"></div>
+
+                                <label class="font-normal callCenter InboxChangedPartsCommentName"><strong>Değişmesi Gereken Parça</strong> </label>
+                                <div class="contentText callCenter InboxChangedPartsComment" id="InboxChangedPartsComment"></div>
+
+                                <label class="font-normal InboxCallCenterComment"><strong>Açıklama</strong> </label>
+                                <div class="contentText  InboxCallCenterCommentName" id="InboxCallCenterComment"></div>
+
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="font-normal InboxCompanyNameName"><strong>Firma Adı</strong> </label>
+                                <div class="contentText InboxCompanyName" id="InboxCompanyName"></div>
+                                <label class="font-normal InboxRelatedPersonNameName"><strong>İlgili Kişi</strong> </label>
+                                <div class="contentText InboxRelatedPersonName"></div>
+                                <label class="font-normal InboxRelatedPersonEmailName"><strong>Email</strong> </label>
+                                <div class="contentText InboxRelatedPersonEmail" id="InboxRelatedPersonEmail"></div>
+                                <label class="font-normal callCenter InboxRelatedPersonTitleName"><strong>Unvan</strong> </label>
+                                <div class="contentText callCenter InboxRelatedPersonTitle" id="InboxRelatedPersonTitle"></div>
+                                <label class="font-normal InboxRelatedPersonPhoneName"><strong>Telefon No</strong> </label>
+                                <div class="contentText InboxRelatedPersonPhone" id="InboxRelatedPersonPhone"></div>
+                                <label class="font-normal callCenter InboxCompanyAdressName"><strong>Adres</strong> </label>
+                                <div class="contentText callCenter InboxCompanyAdress" id="InboxCompanyAdress"></div>
+                                <label class="font-normal callCenter InboxCompanyCommentName"><strong>Müşteri Açıklaması</strong> </label>
+                                <div class="contentText callCenter InboxCompanyComment" id="InboxCompanyComment"></div>
+                                <label class="font-normal GuaranteeStartDateName"><strong>Başlangıç Tarihi</strong> </label>
+                                <div class="contentText GuaranteeStartDate" id="GuaranteeStartDate"></div>
+                                <label class="font-normal GuaranteeEndDateName"><strong>Bitiş Tarihi</strong> </label>
+                                <div class="contentText GuaranteeEndDate" id="GuaranteeEndDate"></div>
+                                <label class="font-normal GuaranteeBanDateName"><strong>Tarih</strong> </label>
+                                <div class="contentText GuaranteeBanDate" id="GuaranteeBanDate"></div>
+                                <label class="font-normal  GuaranteeCommentName"><strong>Açıklaması</strong> </label>
+                                <div class="contentText  GuaranteeComment" id="GuaranteeComment"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="Attachment" class="mail-attachment hidden">
+                        <p>
+                            <span><i class="fa fa-paperclip"></i><span id="attachmentText"> </span> </span>
+                        </p>
+
+                        <div class="attachment">
+                            <div id="AttachmentList">
+
+                            </div>
+
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="buttonList">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="inboxInstallationFileModal" tabindex="-1" role="dialog" aria-labelledby="inboxInstallationFileModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="mail-box-header">
+                    <h2>
+                        <span> Doküman Ekle</span>
+                    </h2>
+                </div>
+                <div class="mail-box">
+                    <div class="mail-body">
+                        <form id="FileUploadForm" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group files ">
+                                        <label class="font-normal">Dosya Yükle</label>
+                                        <input type="file" id="files" name="files" multiple>
+                                    </div>
+
+                                    <div class="row">
+                                        <ul class="attachment">
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row"></div>
+                            <div class="hr-line-dashed"></div>
+                            <input id="MachineryServiceId" type="hidden" name="MachineryServiceId" />
+                            <div class="form-group">
+                                <button type='button' class='btn  btn-sm btn-secondary pull-left' data-dismiss='modal'>Kapat</button>
+
+                                <button id="AddFileUploadMachineHistory" type="submit" value="AddFileUploadMachineHistory" formaction="AdminReport/AddFileUploadMachineHistory" formmethod="post" class="btn btn-primary btn-sm pull-right">Kaydet</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var filesToUpload = [];
+
+    $.fn.fileUploader = function (filesToUpload, sectionIdentifier) {
+        var fileIdCounter = 0;
+
+        this.closest(".files").change(function (evt) {
+            var output = [];
+
+            for (var i = 0; i < evt.target.files.length; i++) {
+                fileIdCounter++;
+
+                var file = evt.target.files[i];
+                var fileId = sectionIdentifier + fileIdCounter;
+
+                filesToUpload.push({
+                    id: fileId,
+                    file: file
+                });
+
+                var removeLink = "<div class=\"removeFile btn btn-danger btn-xs\" data-fileid=\"" + fileId + "\"><i class='fa fa-times-circle-o' aria-hidden='true'></i></div>";
+
+                var dataContent = "";
+
+                if (file.type == "image/jpeg" || file.type == "image/png") {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='#'>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<img alt='image' class='feed-photo' src=" + (window.URL ? URL : webkitURL).createObjectURL(file) + ">" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        escape(file.name) +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                } else {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='#'>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<i class='fa fa-file'></i>" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        escape(file.name) +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                }
+
+
+                $(".attachment").append(dataContent);
+
+            };
+            //evt.target.value = null;
+        });
+
+        this.clear = function () {
+            for (var i = 0; i < filesToUpload.length; ++i) {
+                if (filesToUpload[i].id.indexOf(sectionIdentifier) >= 0)
+                    filesToUpload.splice(i, 1);
+            }
+
+            $(this).children(".fileList").empty();
+        }
+
+        return this;
+    };
+
+    (function () {
+        var files1Uploader = $("#files").fileUploader(filesToUpload, "files");
+
+    })()
+
+
+    $('body').on('click', '.removeFile', function (e) {
+        var fileId = $(this).data("fileid");
+        // loop through the files array and check if the name of that file matches FileName
+        // and get the index of the match
+        for (var i = 0; i < filesToUpload.length; ++i) {
+            if (filesToUpload[i].id === fileId)
+                filesToUpload.splice(i, 1);
+        }
+        $(this).parent().remove();
+
+        //$("#files").fileUploader(filesToUpload)
+        $("#files").attr("value", filesToUpload);
+    });
+
+
+
+
+    $(document).ready(function () {
+        getInstallationReportList();
+    });
+    $("#searchSerialNo").bind("keyup change keypress", function (e) {
+        getInstallationReportList();
+    });
+    $("#searchSkuCode").bind("keyup change keypress", function (e) {
+        getInstallationReportList();
+    });
+    $("#searchTracingName").bind("keyup change keypress", function (e) {
+        getInstallationReportList();
+    });
+
+    function getInstallationReportList() {
+        $('#reportListDataContent').text("");
+        $.ajax({
+            type: "POST",
+            dataType: 'json',
+            data: { searchSerialNo: $("#searchSerialNo").val(), searchSkuCode: $("#searchSkuCode").val(), searchTracingName: $("#searchTracingName").val(), searchStartDate: $("#searchStartDate").val(), searchEndDate: $("#searchEndDate").val(), searchStatus: $("#searchStatus").val(), searchServicesType: $("#searchServicesType").val() },
+            url: "@ViewData["UrlPath"]/api/AdminReport/GetMachineHistoryList",
+            success: function (data) {
+
+                $('#reportListDataContent').text("");
+                $(".unreadFlags").text(data.readFlagsNothingCount);
+                var tr;
+                $(data.getInstallationList).each(function (index, element) {
+                    tr = "<tr row='" + element.machineryServiceId + "' class='read'>";
+                    if (element.serviceName == "Kurulum") {
+                        tr += "<td> <span class='label label-primary '>" + element.serviceName + "</span></td>";
+                    } else if (element.serviceName == "Yenileme") {
+                        tr += "<td> <span class='label label-warning '>" + element.serviceName + "</span></td>";
+                    } else if (element.serviceName == "Tamir ve Bakım") {
+                        tr += "<td> <span class='label label-info '>" + element.serviceName + "</span></td>";
+                    } else if (element.serviceName == "Çağrı Merkezi") {
+                        tr += "<td> <span class='label label-success'>" + element.serviceName + "</span></td>";
+                    } else if (element.serviceName == "Garanti İptali") {
+                        tr += "<td> <span class='label label-danger'>" + element.serviceName + "</span></td>";
+                    } else {
+                        tr += "<td> <span class='label label-default'>" + element.serviceName + "</span></td>";
+                    }
+                    tr += "<td class='mail-date'>" + element.createdDateFormat + "</td>";
+
+                    if (element.userName == null || element.userName == undefined) {
+                        tr += "<td></td>";
+                    } else {
+
+                        tr += "<td>" + element.userName + "</td>";
+                    }
+
+                    if (element.serviceDate == null || element.serviceDate == undefined) {
+                        tr += "<td></td>";
+                    } else {
+
+                        tr += "<td>" + element.serviceDate + "</td>";
+                    }
+
+                    if (element.serialNo == null || element.serialNo == undefined) {
+                        tr += "<td></td>";
+                    } else {
+                        tr += "<td>" + element.serialNo + "</td>";
+
+                    }
+                    if (element.tracingName == null || element.tracingName == undefined) {
+                        tr += "<td></td>";
+                    } else {
+                        tr += "<td>" + element.tracingName + "</td>";
+
+                    }
+
+                    if (element.skuCode == null || element.skuCode == undefined) {
+                        tr += "<td></td>";
+                    } else {
+                        tr += "<td>" + element.skuCode + "</td>";
+
+                    }
+
+                    if (element.companyName == null || element.stafName == undefined) {
+                        element.companyName = '';
+                    }
+                    tr += "<td>" + element.companyName + "</td>";
+                    if (element.serviceName != "Uzatmalı Garanti" && element.serviceName != "Garanti İptali") {
+
+                        if (element.serviceStatus == "Beklemede") {
+                            tr += "<td> <span class='label label-warning'>Beklemede</span></td>";
+                        } else if (element.serviceStatus == "Onaylandı") {
+                            tr += " <td><span class='label label-info '>Onaylandı</span></td>";
+                        } else if (element.serviceStatus == "Reddedildi") {
+                            tr += "<td> <span class='label label-warring '>Reddedildi</span></td>";
+                        } else {
+                            tr += "<td></td>"
+                        }
+                    } else {
+                        tr += "<td></td>"
+                    }
+
+                    tr += "<td>" +
+                        "<button onclick='inboxDetail(" + element.machineryServiceId + ")' type='button' class='btn   btn-sm btn-default' data-toggle='modal' data-target='#inboxDetailInstallationModal'>Detay</button>" +
+                        "<button onclick='fileUploadModal(" + element.machineryServiceId + ")' type='button' class='btn  btn-sm btn-default' data-toggle='modal' data-target='#inboxInstallationFileModal'>Dokuman Ekle</button>" +
+                        "</td>";
+                    tr += "</tr>";
+                    $('#reportListDataContent').append(tr);
+                });
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+
+    }
+
+    function fileUploadModal(data) {
+        $("#MachineryServiceId").val(data);
+    }
+    function clearInput() {
+        $("#inboxBy").text("");
+        $("#inboxServiceName").text("");
+        $("#inboxDate").text("");
+        $("#inboxEmail").text("");
+        $("#InboxServiceDate").text("");
+        $("#InboxSerialNo").text("");
+        $("#InboxSkuCode").text();
+        $("#InboxTracingName").text("");
+        $("#InboxCompressorInformation").text("");
+        $("#InboxStafName").text("");
+        $("#InboxMachineComment").text("");
+        $("#InboxCompanyName").text("");
+        $("#InboxRelatedPersonName").text("");
+        $("#InboxRelatedPersonEmail").text("");
+        $("#InboxRelatedPersonTitle").text("");
+        $("#InboxRelatedPersonPhone").text("");
+        $("#InboxCompanyAdress").text("");
+        $("#InboxCompanyComment").text("");
+        $("#InboxChangedPartsComment").text("");
+    }
+
+    var selectedMachineryServiceId;
+    function inboxDetail(MachineryServiceId) {
+        $(".InboxDateName").css("display", "none");
+        $(".InboxDate").css("display", "none");
+        $(".InboxChangedPartsComment").css("display", "none");
+        $(".InboxChangedPartsCommentName").css("display", "none");
+        $(".InboxCustomerComplaint").css("display", "none");
+        $(".InboxCustomerComplaintName").css("display", "none");
+        $(".InboxMachineStartedDateName").css("display", "none");
+        $(".InboxMachineStartedDate").css("display", "none");
+        $(".InboxDateName").css("display", "none");
+        $(".InboxDateDate").css("display", "none");
+        $(".InboxCallCenterCommentName").css("display", "none");
+        $(".InboxCallCenterComment").css("display", "none");
+
+        $(".InboxTracingNameName").css("display", "none");
+        $(".InboxTracingName").css("display", "none");
+        $(".InboxCompanyNameName").css("display", "none");
+        $(".InboxCompanyName").css("display", "none");
+        $(".InboxRelatedPersonNameName").css("display", "none");
+        $(".InboxRelatedPersonName").css("display", "none");
+        $(".InboxRelatedPersonEmailName").css("display", "none");
+        $(".InboxRelatedPersonEmail").css("display", "none");
+        $(".InboxRelatedPersonPhoneName").css("display", "none");
+        $(".InboxRelatedPersonPhone").css("display", "none");
+        $(".InboxCompressorInformationName").css("display", "none");
+        $(".InboxCompressorInformation").css("display", "none");
+        $(".GuaranteeStartDate").css("display", "none");
+        $(".GuaranteeStartDateName").css("display", "none");
+        $(".GuaranteeEndDateName").css("display", "none");
+        $(".GuaranteeEndDate").css("display", "none");
+        $(".GuaranteeBanDateName").css("display", "none");
+        $(".GuaranteeBanDate").css("display", "none");
+        $(".GuaranteeCommentName").css("display", "none");
+        $(".GuaranteeComment").css("display", "none");
+
+
+        selectedMachineryServiceId = MachineryServiceId;
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: { machineryServiceId: MachineryServiceId },
+            url: "@ViewData["UrlPath"]/api/AdminReport/InboxShowById",
+            success: function (data) {
+                console.log(data);
+                if (data.serviceData[0].stafName == null || data.serviceData[0].stafName == undefined) {
+                    data.serviceData[0].stafName = data.serviceData[0].userName
+                }
+                clearInput();
+                $("#inboxBy").text(data.serviceData[0].userName);
+                $("#inboxServiceName").text(data.serviceData[0].serviceName);
+                $("#inboxDate").text(data.serviceData[0].createdDateFormat);
+                $("#inboxEmail").text(data.serviceData[0].userEmail);
+                $("#InboxMachineStartedDate").text(data.serviceData[0].machineStartedDate);
+                $("#InboxSerialNo").text(data.serviceData[0].serialNo);
+                $("#InboxSkuCode").text(data.serviceData[0].skuCode);
+                $("#InboxTracingName").text(data.serviceData[0].tracingName);
+                $("#InboxCompressorInformation").text(data.serviceData[0].compressorInformation);
+                $("#InboxStafName").text(data.serviceData[0].stafName);
+                $("#InboxMachineComment").text(data.serviceData[0].machineComment);
+                $("#InboxCompanyName").text(data.serviceData[0].companyName);
+                $("#InboxRelatedPersonName").text(data.serviceData[0].relatedPerson);
+                $("#InboxRelatedPersonEmail").text(data.serviceData[0].relatedPersonEmail);
+                $("#InboxRelatedPersonTitle").text(data.serviceData[0].relatedPersonEmail);
+                $("#InboxRelatedPersonPhone").text(data.serviceData[0].relatedPersonPhone);
+                $("#InboxCompanyAdress").text(data.serviceData[0].companyAdress);
+                $("#InboxCompanyComment").text(data.serviceData[0].customerComment);
+                $("#InboxChangedPartsComment").text(data.serviceData[0].changedPartsComment);
+                $("#InboxCustomerComplaint").text(data.serviceData[0].customerComplaint);
+                $("#InboxDate").text(data.serviceData[0].serviceDate);
+                $("#InboxCallCenterComment").text(data.serviceData[0].callCenterComment);
+                $("#InboxSkuCode").text(data.serviceData[0].skuCode);
+                $("#InboxTracingName").text(data.serviceData[0].tracingName);
+                $("#GuaranteeStartDate").text(data.serviceData[0].guaranteeStartDate);
+                $("#GuaranteeEndDate").text(data.serviceData[0].guaranteeEndDate);
+                $("#GuaranteeBanDate").text(data.serviceData[0].guaranteeBanDate);
+                $("#GuaranteeComment").text(data.serviceData[0].guaranteeComment);
+
+                $("#buttonList").text("");
+
+                if (data.serviceData[0].serviceName == "Kurulum") {
+                    $(".InboxMachineStartedDate").css("display", "block");
+                    $(".InboxMachineStartedDateName").css("display", "block");
+                    $(".InboxChangedPartsComment").css("display", "none");
+                    $(".InboxChangedPartsCommentName").css("display", "none");
+                    $(".InboxCustomerComplaintName").css("display", "none");
+                    $(".InboxCustomerComplaint").css("display", "none");
+                    $(".InboxDateDate").css("display", "none");
+                    $(".InboxDateName").css("display", "none");
+                    $(".InboxCallCenterCommentName").css("display", "none");
+                    $(".InboxCallCenterComment").css("display", "none");
+                    $(".InboxTracingNameName").css("display", "block");
+                    $(".InboxTracingName").css("display", "block");
+                    $(".InboxCompanyNameName").css("display", "block");
+                    $(".InboxCompanyName").css("display", "block");
+                    $(".InboxRelatedPersonNameName").css("display", "block");
+                    $(".InboxRelatedPersonName").css("display", "block");
+                    $(".InboxRelatedPersonEmailName").css("display", "block");
+                    $(".InboxRelatedPersonEmail").css("display", "block");
+                    $(".InboxRelatedPersonPhoneName").css("display", "block");
+                    $(".InboxRelatedPersonPhone").css("display", "block");
+                    $(".InboxCompressorInformationName").css("display", "block");
+                    $(".InboxCompressorInformation").css("display", "block");
+                    $(".GuaranteeStartDate").css("display", "none");
+                    $(".GuaranteeStartDateName").css("display", "none");
+                    $(".GuaranteeEndDateName").css("display", "none");
+                    $(".GuaranteeEndDate").css("display", "none");
+                    $(".GuaranteeBanDateName").css("display", "none");
+                    $(".GuaranteeBanDate").css("display", "none");
+                    $(".GuaranteeCommentName").css("display", "none");
+                    $(".GuaranteeComment").css("display", "none");
+                } else if (data.serviceData[0].serviceName == "Yenileme") {
+                    $(".InboxMachineStartedDate").css("display", "none");
+                    $(".InboxMachineStartedDateName").css("display", "none");
+                    $(".InboxChangedPartsComment").css("display", "block");
+                    $(".InboxChangedPartsCommentName").css("display", "block");
+                    $(".InboxCustomerComplaintName").css("display", "none");
+                    $(".InboxCustomerComplaint").css("display", "none");
+                    $(".InboxDateName").css("display", "block");
+                    $(".InboxDateDate").css("display", "block");
+                    $(".InboxCallCenterCommentName").css("display", "none");
+                    $(".InboxCallCenterComment").css("display", "none");
+                    $(".InboxTracingNameName").css("display", "block");
+                    $(".InboxTracingName").css("display", "block");
+                    $(".InboxCompanyNameName").css("display", "block");
+                    $(".InboxCompanyName").css("display", "block");
+                    $(".InboxRelatedPersonNameName").css("display", "block");
+                    $(".InboxRelatedPersonName").css("display", "block");
+                    $(".InboxRelatedPersonEmailName").css("display", "block");
+                    $(".InboxRelatedPersonEmail").css("display", "block");
+                    $(".InboxRelatedPersonPhoneName").css("display", "block");
+                    $(".InboxRelatedPersonPhone").css("display", "block");
+                    $(".InboxCompressorInformationName").css("display", "block");
+                    $(".InboxCompressorInformation").css("display", "block");
+                    $(".GuaranteeStartDate").css("display", "none");
+                    $(".GuaranteeStartDateName").css("display", "none");
+                    $(".GuaranteeEndDateName").css("display", "none");
+                    $(".GuaranteeEndDate").css("display", "none");
+                    $(".GuaranteeBanDateName").css("display", "none");
+                    $(".GuaranteeBanDate").css("display", "none");
+                    $(".GuaranteeCommentName").css("display", "none");
+                    $(".GuaranteeComment").css("display", "none");
+                } else if (data.serviceData[0].serviceName == "Tamir ve Bakım") {
+                    $(".InboxMachineStartedDate").css("display", "none");
+                    $(".InboxMachineStartedDateName").css("display", "none");
+                    $(".InboxChangedPartsComment").css("display", "block");
+                    $(".InboxChangedPartsCommentName").css("display", "block");
+                    $(".InboxCustomerComplaintName").css("display", "block");
+                    $(".InboxCustomerComplaint").css("display", "block");
+                    $(".InboxDateName").css("display", "block");
+                    $(".InboxDateDate").css("display", "block");
+                    $(".InboxCallCenterCommentName").css("display", "none");
+                    $(".InboxCallCenterComment").css("display", "none");
+                    $(".InboxTracingNameName").css("display", "block");
+                    $(".InboxTracingName").css("display", "block");
+                    $(".InboxCompanyNameName").css("display", "block");
+                    $(".InboxCompanyName").css("display", "block");
+                    $(".InboxRelatedPersonNameName").css("display", "block");
+                    $(".InboxRelatedPersonName").css("display", "block");
+                    $(".InboxRelatedPersonEmailName").css("display", "block");
+                    $(".InboxRelatedPersonEmail").css("display", "block");
+                    $(".InboxRelatedPersonPhoneName").css("display", "block");
+                    $(".InboxRelatedPersonPhone").css("display", "block");
+                    $(".InboxCompressorInformationName").css("display", "block");
+                    $(".InboxCompressorInformation").css("display", "block");
+                    $(".GuaranteeStartDate").css("display", "none");
+                    $(".GuaranteeStartDateName").css("display", "none");
+                    $(".GuaranteeEndDateName").css("display", "none");
+                    $(".GuaranteeEndDate").css("display", "none");
+                    $(".GuaranteeBanDateName").css("display", "none");
+                    $(".GuaranteeBanDate").css("display", "none");
+                    $(".GuaranteeCommentName").css("display", "none");
+                    $(".GuaranteeComment").css("display", "none");
+
+                } else if (data.serviceData[0].serviceName == "Çağrı Merkezi") {
+                    $(".InboxChangedPartsComment").css("display", "none");
+                    $(".InboxChangedPartsCommentName").css("display", "none");
+                    $(".InboxMachineStartedDate").css("display", "none");
+                    $(".InboxMachineStartedDateName").css("display", "none");
+                    $(".InboxCustomerComplaintName").css("display", "none");
+                    $(".InboxCustomerComplaint").css("display", "none");
+                    $(".InboxDateName").css("display", "none");
+                    $(".InboxDateDate").css("display", "none");
+                    $(".InboxCallCenterCommentName").css("display", "block");
+                    $(".InboxCallCenterComment").css("display", "block");
+                    $(".callCenter").css("display", "none");
+                    $(".InboxTracingNameName").css("display", "block");
+                    $(".InboxTracingName").css("display", "block");
+                    $(".InboxCompanyNameName").css("display", "block");
+                    $(".InboxCompanyName").css("display", "block");
+                    $(".InboxRelatedPersonNameName").css("display", "block");
+                    $(".InboxRelatedPersonName").css("display", "block");
+                    $(".InboxRelatedPersonEmailName").css("display", "block");
+                    $(".InboxRelatedPersonEmail").css("display", "block");
+                    $(".InboxRelatedPersonPhoneName").css("display", "block");
+                    $(".InboxRelatedPersonPhone").css("display", "block");
+                    $(".InboxCompressorInformationName").css("display", "block");
+                    $(".InboxCompressorInformation").css("display", "block");
+                    $(".GuaranteeStartDate").css("display", "none");
+                    $(".GuaranteeStartDateName").css("display", "none");
+                    $(".GuaranteeEndDateName").css("display", "none");
+                    $(".GuaranteeEndDate").css("display", "none");
+                    $(".GuaranteeBanDateName").css("display", "none");
+                    $(".GuaranteeBanDate").css("display", "none");
+                    $(".GuaranteeCommentName").css("display", "none");
+                    $(".GuaranteeComment").css("display", "none");
+                } else if (data.serviceData[0].serviceName == "Uzatmalı Garanti") {
+                    $(".InboxChangedPartsComment").css("display", "none");
+                    $(".InboxChangedPartsCommentName").css("display", "none");
+                    $(".InboxMachineStartedDate").css("display", "none");
+                    $(".InboxMachineStartedDateName").css("display", "none");
+                    $(".InboxCustomerComplaintName").css("display", "none");
+                    $(".InboxCustomerComplaint").css("display", "none");
+                    $(".InboxDateName").css("display", "none");
+                    $(".InboxDateDate").css("display", "none");
+                    $(".InboxCallCenterCommentName").css("display", "none");
+                    $(".InboxCallCenterComment").css("display", "none");
+                    $(".callCenter").css("display", "none");
+                    $(".InboxTracingNameName").css("display", "none");
+                    $(".InboxTracingName").css("display", "none");
+                    $(".InboxCompanyNameName").css("display", "none");
+                    $(".InboxCompanyName").css("display", "none");
+                    $(".InboxRelatedPersonNameName").css("display", "none");
+                    $(".InboxRelatedPersonName").css("display", "none");
+                    $(".InboxRelatedPersonEmailName").css("display", "none");
+                    $(".InboxRelatedPersonEmail").css("display", "none");
+                    $(".InboxRelatedPersonPhoneName").css("display", "none");
+                    $(".InboxRelatedPersonPhone").css("display", "none");
+                    $(".InboxCompressorInformationName").css("display", "none");
+                    $(".InboxCompressorInformation").css("display", "none");
+                    $(".GuaranteeStartDate").css("display", "block");
+                    $(".GuaranteeStartDateName").css("display", "block");
+                    $(".GuaranteeEndDateName").css("display", "block");
+                    $(".GuaranteeEndDate").css("display", "block");
+                    $(".GuaranteeBanDateName").css("display", "none");
+                    $(".GuaranteeBanDate").css("display", "none");
+                    $(".GuaranteeCommentName").css("display", "block");
+                    $(".GuaranteeComment").css("display", "block");
+                } else {
+                    $(".InboxChangedPartsComment").css("display", "none");
+                    $(".InboxChangedPartsCommentName").css("display", "none");
+                    $(".InboxMachineStartedDate").css("display", "none");
+                    $(".InboxMachineStartedDateName").css("display", "none");
+                    $(".InboxCustomerComplaintName").css("display", "none");
+                    $(".InboxCustomerComplaint").css("display", "none");
+                    $(".InboxDateName").css("display", "none");
+                    $(".InboxDateDate").css("display", "none");
+                    $(".InboxCallCenterCommentName").css("display", "none");
+                    $(".InboxCallCenterComment").css("display", "none");
+                    $(".callCenter").css("display", "none");
+                    $(".InboxTracingNameName").css("display", "none");
+                    $(".InboxTracingName").css("display", "none");
+                    $(".InboxCompanyNameName").css("display", "none");
+                    $(".InboxCompanyName").css("display", "none");
+                    $(".InboxRelatedPersonNameName").css("display", "none");
+                    $(".InboxRelatedPersonName").css("display", "none");
+                    $(".InboxRelatedPersonEmailName").css("display", "none");
+                    $(".InboxRelatedPersonEmail").css("display", "none");
+                    $(".InboxRelatedPersonPhoneName").css("display", "none");
+                    $(".InboxRelatedPersonPhone").css("display", "none");
+                    $(".InboxCompressorInformationName").css("display", "none");
+                    $(".InboxCompressorInformation").css("display", "none");
+                    $(".GuaranteeStartDate").css("display", "none");
+                    $(".GuaranteeStartDateName").css("display", "none");
+                    $(".GuaranteeEndDateName").css("display", "none");
+                    $(".GuaranteeEndDate").css("display", "none");
+                    $(".GuaranteeBanDateName").css("display", "block");
+                    $(".GuaranteeBanDate").css("display", "block");
+                    $(".GuaranteeCommentName").css("display", "block");
+                    $(".GuaranteeComment").css("display", "block");
+
+                }
+
+                getAttachment(data.serviceData[0].fileNames);
+                var buttonList = '';
+
+                buttonList += "<button type='button' class='btn  btn-sm btn-secondary pull-left' data-dismiss='modal'>Kapat</button>";
+                $("#buttonList").append(buttonList);
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+
+    }
+    var base_url = window.location.origin;
+    function getAttachment(fileNames) {
+        $('#AttachmentList').text("");
+        if (fileNames == null || fileNames == undefined || fileNames == '') {
+            $("#Attachment").addClass("hidden");
+
+        } else {
+            $("#Attachment").removeClass("hidden");
+            var fileArry = fileNames.split('||');
+            var fileCount = fileArry.length;
+            $("#attachmentText").text(fileCount + " Dosya Eki");
+
+
+            $(fileArry).each(function (index, value) {
+                var dataContent = "";
+                var lastFive = value.substr(value.length - 3);
+
+                if (lastFive == "png" || lastFive == "jpg") {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='~/../../../StaticFiles/ACS/Services/" + value + "' download>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<img alt='image' class='feed-photo' src='~/../../../StaticFiles/ACS/Services/" + value + "' >" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        value +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                } else {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='#'>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<i class='fa fa-file'></i>" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        value +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                }
+
+
+                //var div = "<div class='file-box'>" +
+                //    "<div class='file'>" +
+                //    "<a href='" + base_url + "/Files/" + value + "' download>" +
+                //    "<div class='file-name'>" + value +
+                //    "</div>" +
+                //    "</a>" +
+                //    "</div>" +
+                //    "</div>";
+                $('#AttachmentList').append(dataContent);
+            });
+        }
+    }
+
+
+    $("#searchStartDate").datepicker({
+        todayBtn: "linked",
+        language: "tr",
+        autoclose: true,
+        todayHighlight: true,
+    });
+    $("#searchEndDate").datepicker({
+        todayBtn: "linked",
+        language: "tr",
+        autoclose: true,
+        todayHighlight: true,
+    });
+
+
+    $("#MachineHistoryReport").addClass("active");
+</script>
+
+

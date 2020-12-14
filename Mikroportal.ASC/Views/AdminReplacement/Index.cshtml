@@ -1,0 +1,292 @@
+﻿@{
+    Layout = "_LayoutACSAdmin";
+}
+
+
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Yedek Parça</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="AdminHome">Anasayfa</a>
+            </li>
+
+            <li class="active">
+                <strong>Yedek Parça</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row">
+                        <form method="get" action="index.html" class="pull-right mail-search">
+                            <div class="input-group">
+                                <input id="PartNo" type="text" class="form-control input-sm" name="PartNo" placeholder="Part No Ara">
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-sm btn-primary">
+                                        Ara
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <br /><br /><br />
+                    </div>
+
+                    <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive">
+                        <table id="yedekParca" class="footable table table-stripped toggle-arrow-tiny">
+                            <thead>
+                                <tr>
+                                    <th>Kurutucu Modeli</th>
+                                    <th>Voltaj</th>
+                                    <th>ED DRAWING ITEM NO.</th>
+                                    <th>Part No</th>
+                                    <th>Adı</th>
+                                    <th>Adet</th>
+                                    <th>Fiyat</th>
+                                    <th>Para Birimi</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="replacementDataContent">
+                                @*<tr>
+                                        <td>MKE-23</td>
+                                        <td>230V/1/50Hz</td>
+                                        <td>1</td>
+                                        <td>1054180100</td>
+                                        <td>MK10-20-30-35-01 PANEL (7012 THICK RAGGED GREY)</td>
+                                        <td>1</td>
+                                        <td>43,70</td>
+                                        <td>EURO</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr><td>MKE-23</td><td>230V/1/50Hz</td><td>2</td><td>1025060100</td><td>MK35 CONDANSER</td><td>1</td><td>60,00</td><td>EURO</td>  <td></td></tr>
+                                    <tr><td>MKE-23</td><td>230V/1/50Hz</td><td>3</td><td>1025150100</td><td>MK10-40 (Ø200) FAN PROPELLER</td><td>1</td><td>2,52</td><td>EURO</td>  <td></td></tr>
+                                    <tr><td>MKE-23</td><td>230V/1/50Hz</td><td>4</td><td>1025260100</td><td>MK10-40 (Ø220) FAN GRILL</td><td>1</td><td>2,71</td><td>EURO</td>  <td></td></tr>
+                                    <tr><td>MKE-23</td><td>230V/1/50Hz</td><td>5</td><td>1025370100</td><td>MK10-40 230/1/50 FAN MOTOR</td><td>1</td><td>19,02</td><td>EURO</td>  <td></td></tr>
+                                    <tr><td>MKE-23</td><td>230V/1/50Hz</td><td>6</td><td>1017260100</td><td>MK10-35 EXCHANGER</td><td>1</td><td>89,76</td><td>EURO</td>  <td></td></tr>
+                                    <tr><td>MKE-23</td><td>230V/1/50Hz</td><td>7</td><td>1026930100</td><td>MK10-35 ISOLATION POLISTIREN</td><td>1</td><td>5,40</td><td>EURO</td>  <td></td></tr>
+                                    <tr><td>MKE-23</td><td>230V/1/50Hz</td><td>8</td><td>1002060100</td><td>1/2" CORNER UNION</td><td>1</td><td>10,21</td><td>EURO</td>  <td></td></tr>*@
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="replacementUpdateModal" tabindex="-1" role="dialog" aria-labelledby="replacementUpdateModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div class="mail-box-header">
+                    <h2>
+                        Yedek Parça Güncelleme Paneli
+                    </h2>
+                </div>
+                <div class="mail-box">
+
+                    <div class="mail-body">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @*<div class="form-group">
+                                        <label class="font-normal">Part No</label>
+                                        <input id="PartNo" name="PartNo" type="text" class="form-control" disabled>
+                                    </div>*@
+
+                                    <div class="form-group">
+                                        <label class="font-normal">Kurutucu Modeli</label>
+                                        <input id="DryerModel" name="DryerModel" type="text" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-normal">Voltaj</label>
+                                        <input id="Voltage" name="Voltage" type="text" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-normal">Ed Drawing Item No</label>
+                                        <input id="EdDrawingItemNo" name="EdDrawingItemNo" type="number" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    @*<div class="form-group">
+                                        <label class="font-normal">Adı</label>
+                                        <input id="Sad" name="Sad" type="text" class="form-control" disabled>
+                                    </div>*@
+
+                                    <div class="form-group">
+                                        <label class="font-normal">Adet</label>
+                                        <input id="Qty" name="Qty" type="number" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-normal">Fiyat</label>
+                                        <input id="Price" name="Price" type="number" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-normal">Para Birimi</label>
+                                        <input id="Currency" name="Currency" type="text" class="form-control">
+                                    </div>
+                                    <br /><br />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="clearfix"></div>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="buttonList">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#AdminReplacement").addClass("active");
+    $(document).ready(function () {
+        getReplacementList();
+        getInboxCount();
+    });
+
+    $("#PartNo").keyup(function () {
+        getReplacementList();
+    });
+
+    function getInboxCount() {
+        $('#reportListDataContent').text("");
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url:"@ViewData["UrlPath"]/api/AdminReplacement/getInboxCount",
+            success: function (data) {
+                $(".unreadFlags").text(data.readFlagsNothingCount);
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+    }
+    function getReplacementList(data) {
+
+        $('#replacementDataContent').text("");
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: { search: $("#PartNo").val() },
+            url: "@ViewData["UrlPath"]/api/AdminReplacement/GetReplacementList",
+            success: function (data) {
+                var tr;
+                $(data.replacementList).each(function (index, element) {
+
+                    tr = "<tr row='" + element.replacementPartId + "' class='read'>";
+                    if (element.dryerModel == null || element.dryerModel == undefined) {
+                        element.dryerModel = ''
+                    }
+                    tr += "<td>" + element.dryerModel + "</td>";
+
+                    if (element.voltage == null || element.voltage == undefined) {
+                        element.voltage = ''
+                    }
+                    tr += "<td>" + element.voltage + "</td>";
+
+
+                    if (element.edDrawingItemNo == null || element.edDrawingItemNo == undefined) {
+                        element.edDrawingItemNo = ''
+                    }
+                    tr += "<td>" + element.edDrawingItemNo + "</td>";
+
+                    if (element.partNo == null || element.partNo == undefined) {
+                        element.partNo = ''
+                    }
+                    tr += "<td>" + element.partNo + "</td>";
+
+                    if (element.sad == null || element.sad == undefined) {
+                        element.sad = ''
+                    }
+                    tr += "<td>" + element.sad + "</td>";
+
+                    if (element.qty == null || element.qty == undefined) {
+                        element.qty = ''
+                    }
+                    tr += "<td>" + element.qty + "</td>";
+                    if (element.price == null || element.price == undefined) {
+                        element.price = ''
+                    }
+                    tr += "<td>" + element.price + "</td>";
+
+                    if (element.currency == null || element.currency == undefined) {
+                        element.currency = ''
+                    }
+                    tr += "<td>" + element.currency + "</td>";
+
+                    tr += "<td><button onclick='replacementModel(" + element.partNo + ")' type='button' class='btn  btn-xs btn-info' data-toggle='modal' data-target='#replacementUpdateModal'>Güncelle</button></td>";
+                    tr += "</tr>";
+                    $('#replacementDataContent').append(tr);
+
+                });
+
+
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+
+    }
+
+
+
+    function replacementModel(partNo) {
+        $("#buttonList").text("");
+        //$("#PartNo").text(data.partNo);
+        //$("#Sad").text(data.sad);
+
+        var buttonList = '';
+
+        buttonList += "<button type='button' class='btn  btn-xs btn-secondary pull-left' data-dismiss='modal'>Kapat</button>" +
+            "<button type='button' id='IsApprovedButton' onclick='IsSave(" + partNo + ")' class='btn  btn-xs btn-primary pull-right' data-dismiss='modal'>Kaydet</button>";
+        $("#buttonList").append(buttonList);
+
+    }
+
+
+    function IsSave(partNo) {
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: { DryerModel: $("#DryerModel").val(), Voltage: $("#Voltage").val(), EdDrawingItemNo: $("#EdDrawingItemNo").val(), Qty: $("#Qty").val(), Price: $("#Price").val(), Currency: $("#Currency").val(), PartNo: partNo },
+            url: "@ViewData["UrlPath"]/api/AdminReplacement/SaveReplacementPrice",
+            success: function (data) {
+
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+
+    }
+
+</script>

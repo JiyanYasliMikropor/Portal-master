@@ -1,0 +1,238 @@
+﻿@model Mikroportal.MODEL.RequestResponseClasses.GetDashboardMenuResponse
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@*@using Microsoft.AspNetCore.Builder
+    @using Microsoft.Extensions.Options*@
+
+@inject IViewLocalizer Localizer
+@*@inject IOptions<RequestLocalizationOptions> LocOptions
+
+    @{
+        var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+        var cultureItems = LocOptions.Value.SupportedUICultures
+            .Select(c => new SelectListItem { Value = c.Name, Text = c.DisplayName })
+            .ToList();
+    }*@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="~/Images/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="~/Images/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="~/Images/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="~/Images/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="~/Images/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="~/Images/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="~/Images/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="~/Images/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/Images/favicon//apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="~/Images/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/Images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="~/Images/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/Images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="~/Images/favicon//manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="~/Images/favicon//ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Toastr style -->
+    <link href="~/css/plugins/toastr/toastr.min.css" rel="stylesheet">
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/lib_bower/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="~/css/Admin/style.css" rel="stylesheet" />
+    <!-- DataTable -->
+    <link href="~/lib/dataTable/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/dataTable/responsive.bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/dataTable/buttons.dataTables.min.css" rel="stylesheet" />
+    <link href="~/js/jquery-ui.css" rel="stylesheet" />
+
+    <link href="~/css/plugins/slick/slick.css" rel="stylesheet">
+    <link href="~/css/plugins/slick/slick-theme.css" rel="stylesheet">
+
+    <!-- Mainly scripts -->
+    <script src="~/js/jquery-3.1.1.min.js"></script>
+    <script src="~/js/jquery-ui.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="~/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <link href="~/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+    <!-- Data picker -->
+    <script src="~/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="~/js/plugins/datapicker/locales/bootstrap-datepicker.tr.min.js"></script>
+    <!-- Custom and plugin javacsript -->
+    <script src="~/js/inspinia.js"></script>
+    <script src="~/js/plugins/pace/pace.min.js"></script>
+    <!-- Toastr -->
+    <script src="~/js/plugins/toastr/toastr.min.js"></script>
+    <!-- iCheck -->
+    <script src="~/js/plugins/iCheck/icheck.min.js"></script>
+    <!-- DataTable -->
+    <script src="~/lib/dataTable/jquery.dataTables.min.js"></script>
+    <script src="~/lib/dataTable/dataTables.bootstrap4.min.js"></script>
+    <script src="~/lib/dataTable/dataTables.responsive.min.js"></script>
+    <script src="~/lib/dataTable/responsive.bootstrap.min.js"></script>
+    <script src="~/lib/dataTable/dataTables.buttons.min.js"></script>
+    <script src="~/lib/dataTable/dataTables.fixedHeader.min.js"></script>
+    <script src="~/lib/dataTable/jszip.min.js"></script>
+    <script src="~/lib/dataTable/pdfmake.min.js"></script>
+    <script src="~/lib/dataTable/vfs_fonts.js"></script>
+    <script src="~/lib/dataTable/buttons.html5.min.js"></script>
+
+    <!-- slick carousel-->
+    <script src="~/js/plugins/slick/slick.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+        });
+    </script>
+    <style>
+        .profile-element img {
+            width: 145px;
+            margin-left: 0px;
+        }
+
+        .navbar-minimalize.btn-primary, .navbar-minimalize.btn-primary:hover, .navbar-minimalize.btn-primary:focus, .navbar-minimalize.btn-primary:active {
+            background-color: #636363;
+            border-color: #545454;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header logo-header">
+                        <div class="dropdown profile-element">
+                            <span>
+                                @*<a asp-action="Index" asp-controller="Home"><img class="logo" alt="image" src="~/Images/logo-white.png" /></a>*@
+
+                                @{
+                                    string rootUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value.ToString()}";
+                                    if (rootUrl.Contains("localhost"))
+                                    {
+                                        <a href="http://localhost:53143/Dashboard/Index"><img class="logo" alt="image" src="~/Images/logo-white.png" /></a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@rootUrl/Dashboard/Index"><img class="logo" alt="image" src="~/Images/logo-white.png" /></a>
+                                        @*<a asp-action="Index" asp-controller="Home"><img class="logo" alt="image" src="~/_content/Mikroportal.UI/Images/logo-white.png" /></a>*@
+                                    }
+                                }
+                            </span>
+
+                        </div>
+                    </li>
+                    @*@{
+            string rootUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value.ToString()}";
+            if (rootUrl.Contains("localhost"))
+            {
+                rootUrl = "http://localhost:62513";
+            }
+        }*@
+
+
+                    @if (Model != null)
+                    {
+                        string rootUrl2 = $"{Context.Request.Scheme}://{Context.Request.Host.Value.ToString()}";
+                        if (rootUrl2.Contains("localhost"))
+                        {
+                            //rootUrl = "http://localhost:62513";
+                            @foreach (var item in Model.GetDashboardMenuList)
+                            {
+                                <li>
+                                    <a href="@item.MenuItemUrlLocalhost"><i class="@item.MenuItemIcon" aria-hidden="true"></i> <span class="nav-label">@item.MenuItemName</span></a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.GetDashboardMenuList)
+                            {
+                                <li>
+                                    <a href="@rootUrl2@item.MenuItemUrl"><i class="@item.MenuItemIcon" aria-hidden="true"></i> <span class="nav-label">@item.MenuItemName</span></a>
+                                </li>
+                            }
+                        }
+
+
+                    }
+                </ul>
+
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg">
+            <!-- Top Navbar -->
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0">
+
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+                    </div>
+
+                    <ul class="nav navbar-top-links navbar-right pull-right">
+                        <li>
+                            <img src="~/Images/language-options-icon2.png" />
+                        </li>
+                        <li>
+                            <a asp-action="SetLanguage" asp-controller="Dashboard" asp-route-returnUrl="@Context.Request.Path" asp-route-culture="tr">@Localizer["LangTr"] </a>
+                        </li>
+                        <li>
+                            <a asp-action="SetLanguage" asp-controller="Dashboard" asp-route-returnUrl="@Context.Request.Path" asp-route-culture="en">@Localizer["LangEn"]</a>
+                        </li>
+                        <li>
+                            <a asp-action="SetLanguage" asp-controller="Dashboard" asp-route-returnUrl="@Context.Request.Path" asp-route-culture="es">@Localizer["LangEsp"]</a>
+                        </li>
+                        <li>
+                            <a asp-action="SetLanguage" asp-controller="Dashboard" asp-route-returnUrl="@Context.Request.Path" asp-route-culture="fr">@Localizer["LangFr"]</a>
+                        </li>
+                        <li>
+                            <a asp-action="SetLanguage" asp-controller="Dashboard" asp-route-returnUrl="@Context.Request.Path" asp-route-culture="de">@Localizer["LangAlm"]</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-top-links navbar-right pull-left">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#" aria-expanded="false">
+                                <strong> @ViewBag.UserName</strong> <i class="fa fa-chevron-down" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-alerts">
+                                <li>
+                                    <a asp-action="LogOut" asp-controller="Account">
+                                        <i class="fa fa-sign-out"></i> @Localizer["BtnCikis"]
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+
+                </nav>
+            </div>
+
+
+            @RenderBody()
+
+            @Html.Partial("_Footer")
+
+        </div>
+    </div>
+
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

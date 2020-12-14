@@ -1,0 +1,194 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@model Mikroportal.MODEL.RequestResponseClasses.GetDashboardMenuResponse
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="~/_content/Mikroportal.UI/Images/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/_content/Mikroportal.UI/Images/favicon//apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="~/_content/Mikroportal.UI/Images/favicon//android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/_content/Mikroportal.UI/Images/favicon//favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="~/_content/Mikroportal.UI/Images/favicon//favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/_content/Mikroportal.UI/Images/favicon//favicon-16x16.png">
+    <link rel="manifest" href="~/_content/Mikroportal.UI/Images/favicon//manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="~/_content/Mikroportal.UI/Images/favicon//ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <!-- Toastr style -->
+    <link href="~/_content/Mikroportal.UI/css/plugins/toastr/toastr.min.css" rel="stylesheet">
+
+    <link href="~/_content/Mikroportal.UI/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/_content/Mikroportal.UI/lib_bower/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/_content/Mikroportal.UI/css/plugins/iCheck/custom.css" rel="stylesheet">
+    <link href="~/_content/Mikroportal.UI/css/Admin/style.css" rel="stylesheet" />
+
+    <!-- DataTable -->
+    <link href="~/_content/Mikroportal.UI/lib/dataTable/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/_content/Mikroportal.UI/lib/dataTable/responsive.bootstrap.min.css" rel="stylesheet" />
+    <link href="~/_content/Mikroportal.UI/lib/dataTable/buttons.dataTables.min.css" rel="stylesheet" />
+    <link href="~/_content/Mikroportal.UI/js/jquery-ui.css" rel="stylesheet" />
+
+    <!-- Mainly scripts -->
+    <script src="~/_content/Mikroportal.UI/js/jquery-3.1.1.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/js/bootstrap.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="~/_content/Mikroportal.UI/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <link href="~/_content/Mikroportal.UI/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+    <!-- Data picker -->
+    <script src="~/_content/Mikroportal.UI/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+
+    <!-- Custom and plugin javacsript -->
+    <script src="~/_content/Mikroportal.UI/js/inspinia.js"></script>
+    <script src="~/_content/Mikroportal.UI/js/plugins/pace/pace.min.js"></script>
+    <!-- Toastr -->
+    <script src="~/_content/Mikroportal.UI/js/plugins/toastr/toastr.min.js"></script>
+    <!-- iCheck -->
+    <script src="~/_content/Mikroportal.UI/js/plugins/iCheck/icheck.min.js"></script>
+
+    <!-- DataTable -->
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/jquery.dataTables.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/dataTables.bootstrap4.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/dataTables.responsive.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/responsive.bootstrap.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/dataTables.buttons.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/dataTables.fixedHeader.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/jszip.min.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/vfs_fonts.js"></script>
+    <script src="~/_content/Mikroportal.UI/lib/dataTable/buttons.html5.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+        });
+    </script>
+    <style>
+        .profile-element img {
+            width: 145px;
+            margin-left: 0px;
+        }
+
+        .navbar-minimalize.btn-primary, .navbar-minimalize.btn-primary:hover, .navbar-minimalize.btn-primary:focus, .navbar-minimalize.btn-primary:active {
+            background-color: #636363;
+            border-color: #545454;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header logo-header">
+                        <div class="dropdown profile-element">
+                            <span>
+                                @{
+                                    string rootUrl = $"{Context.Request.Scheme}://{Context.Request.Host.Value.ToString()}";
+                                    if (rootUrl.Contains("localhost"))
+                                    {
+                                        <a href="http://localhost:53143/Dashboard/Index"><img class="logo" alt="image" src="~/_content/Mikroportal.UI/Images/logo-white.png" /></a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@rootUrl/Dashboard/Index"><img class="logo" alt="image" src="~/_content/Mikroportal.UI/Images/logo-white.png" /></a>
+                                    }
+                                }
+                            </span>
+
+                        </div>
+                    </li>
+
+                    @if (Model != null && Model.GetDashboardMenuList != null)
+                    {
+
+                        string rootUrl2 = $"{Context.Request.Scheme}://{Context.Request.Host.Value.ToString()}";
+                        if (rootUrl2.Contains("localhost"))
+                        {
+                            @foreach (var item in Model.GetDashboardMenuList)
+                            {
+                                <li>
+                                    <a href="@item.MenuItemUrlLocalhost"><i class="@item.MenuItemIcon" aria-hidden="true"></i> <span class="nav-label">@item.MenuItemName</span></a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.GetDashboardMenuList)
+                            {
+                                <li>
+                                    <a href="@rootUrl2@item.MenuItemUrl"><i class="@item.MenuItemIcon" aria-hidden="true"></i> <span class="nav-label">@item.MenuItemName</span></a>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg">
+            <!-- Top Navbar -->
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0;">
+
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+                    </div>
+
+                    @*<ul class="nav navbar-top-links navbar-right pull-right">
+                        <li><a href="#">@ViewData["UserName"]</a></li>
+                        <li>
+                            <a asp-action="LogOut" asp-controller="MesH">
+                                <i class="fa fa-sign-out"></i> Çıkış
+                            </a>
+                        </li>
+                    </ul>*@
+
+                    <ul class="nav navbar-top-links navbar-right pull-left">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#" aria-expanded="false">
+                                <strong> @ViewBag.UserName</strong> <i class="fa fa-chevron-down" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-alerts">
+                                <li>
+                                    <a asp-action="LogOut" asp-controller="MesHome">
+                                        <i class="fa fa-sign-out"></i> Çıkış
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+
+                </nav>
+            </div>
+
+            @RenderBody()
+
+            @Html.Partial("_Footer")
+
+        </div>
+    </div>
+
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

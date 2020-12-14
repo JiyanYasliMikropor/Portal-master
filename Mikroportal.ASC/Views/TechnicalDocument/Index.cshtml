@@ -1,0 +1,250 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["PageName"];
+    ViewData["LanguageSelection"] = Localizer["LanguageSelection"];
+    ViewData["Welcome"] = Localizer["Welcome"];
+    ViewData["LogOut"] = Localizer["LogOut"];
+    Layout = "_LayoutACSService";
+
+}
+<style>
+    .file {
+        position: relative;
+        background: linear-gradient(to right, lightblue 50%, transparent 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        transition: all 1s ease;
+    }
+
+    .file {
+        border: 1px solid #e7eaec;
+        padding: 0;
+        background-color: #ffffff;
+        position: relative;
+        margin-bottom: 2px;
+        margin-right: 100px;
+    }
+
+        .file.done {
+            background: #1ab394;
+        }
+
+        .file a {
+            display: block;
+            position: relative;
+            padding: 4px 9px;
+            text-align: left;
+            color: #424242;
+            font-size: 10px;
+        }
+
+    .fileList {
+        margin: 15px 0px;
+    }
+
+        .fileList .btn-xs {
+            float: right;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-12">
+        <h2>@Localizer["TechnicalDocument"]</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="Home">@Localizer["Home"]</a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-controller="Home">@Localizer["TechnicalSupport"]</a>
+            </li>
+            <li class="active">
+                <strong>@Localizer["TechnicalDocument"]</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+    </div>
+</div>
+<div class="wrapper wrapper-content">
+
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>@Localizer["TechnicalDocument"]</h5>
+            </div>
+            <div class="ibox-content">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-normal">@Localizer["SerialNumber"]</label>
+                            <input id="SerialNo" name="SerialNo" type="text" required="required" class="form-control">
+                        </div>
+                        <button type="button" id="SerialNoCheckButton" class="ladda-button ladda-button-demo btn pull-right btn-primary" data-style="expand-right">@Localizer["Forward"]</button>
+                    </div>
+                </div>
+
+
+
+
+                <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive">
+
+                    <table class="footable table table-stripped toggle-arrow-tiny hidden" data-page-size="15">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["SkuName"]</th>
+                                <th>@Localizer["SkuCode"]</th>
+                                <th>@Localizer["TechnicalDocument"]</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inboxDataContent">
+                            @*@if (Model != null)
+                                {
+                                    @foreach (var item in Model.DocumentList)
+                                    {
+                                        <tr>
+                                            <td class="pt-3">
+                                                @item.Sku
+                                            </td>
+                                            <td class="pt-3">
+                                                @item.SkuId
+                                            </td>
+                                            @if (@item.PhysicalPath == null)
+                                            {
+                                                <td></td>
+                                            }
+                                            else
+                                            {
+                                                <td><a href='~/@item.PhysicalPath' target='_blank'>@item.PhysicalPath</a></td>
+                                            }
+
+                                        </tr>
+                                    }
+                                }*@
+                        </tbody>
+                    </table>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal inmodal" id="KurulumYonlendirmeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeIn">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">@Localizer["Close"]</span></button>
+                <i class="fa  fa-exclamation-triangle modal-icon"></i>
+                <h4 class="modal-title">@Localizer["MachineNotInstalled"]</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    @Localizer["MachineNotInstalledComment"]
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">@Localizer["Cancel"]</button>
+                <a asp-action="Index" asp-controller="Installation" class="btn btn-primary">@Localizer["Forward"]</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //Seri numarasını kontrol etmek için gerekli fonksiyonlar.
+    var base_url = window.location.origin;
+    $("#SerialNoCheckButton").on("click", function () {
+        $('#inboxDataContent').text("");
+
+        var serialNo = $("#SerialNo").val();
+        if (serialNo == null || serialNo == undefined || serialNo == '') {
+            //Uyarı için gerekli fonkisiyon
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning('Seri numarası girilmemiş!');
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { serialNo: $("#SerialNo").val() },
+                url: "@ViewData["UrlPath"]/api/TechnicalDocument/SerialNoCheckTechnicalDocument",
+                beforeSend: function () { $('#SerialNoCheckButton').ladda().ladda('start'); },
+                success: function (data) {
+                    if (data.isSuccess) {
+                        if (data.isModal == true) {
+
+                            $("#KurulumYonlendirmeModal").modal("show");
+
+                        } else {
+                            console.log(data.documentListesi)
+                            var tr;
+
+                            $(data.documentListesi).each(function (index, element) {
+
+                                tr = "<tr row='" + element.machineryServiceId + "' class='read'>";
+
+                                tr += "<td>" + data.machineDetail[0].sku + "</td>";
+                                tr += "<td>" + data.machineDetail[0].skuId + "</td>";
+
+                                if (element.physicalPath == null) {
+                                    tr += "<td></td>";
+                                } else {
+                                    tr += "<td> <a href='~/../../../StaticFiles/" + element.physicalPath + "' target='_blank'>" + element.physicalPath + "</a> </td>";
+                                }
+                                tr += "</tr>";
+                                $('#inboxDataContent').append(tr);
+                            });
+                            $(".table").removeClass("hidden");
+
+                        }
+
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+
+
+                    }
+
+                },
+                complete: function () { $('#SerialNoCheckButton').ladda().ladda('stop'); },
+                error: function (e) {
+
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error(data.errorMessage)
+
+                },
+                cache: false
+            });
+        }
+    });
+</script>
+
+
+
+
+

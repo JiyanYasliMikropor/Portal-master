@@ -1,0 +1,347 @@
+﻿
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+@{
+    Layout = "_LayoutMES";
+    ViewData["Title"] = "Mes - Mes Cogi";
+}
+
+
+
+<script>
+    $(document).ready(function () {
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
+        });
+    });</script>
+
+
+<style>
+    /* The container */
+    .checkboxContainerS {
+        display: block;
+        position: relative;
+        padding-left: 25px;
+        margin-bottom: 9px;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+        /* Hide the browser's default checkbox */
+        .checkboxContainerS input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+    /* Create a custom checkbox */
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 18px;
+        width: 18px;
+        background-color: #eee;
+    }
+
+    /* On mouse-over, add a grey background color */
+    .checkboxContainerS:hover input ~ .checkmark {
+        background-color: #ccc;
+    }
+
+    /* When the checkbox is checked, add a blue background */
+    .checkboxContainerS input:checked ~ .checkmark {
+        background-color: #2196F3;
+    }
+
+    /* Create the checkmark/indicator (hidden when not checked) */
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    /* Show the checkmark when checked */
+    .checkboxContainerS input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    /* Style the checkmark/indicator */
+    .checkboxContainerS .checkmark:after {
+        left: 7px;
+        top: 3px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
+
+    .hiddenTd {
+        display: none !important;
+    }
+
+    .widthClassForTd {
+        width: 8%;
+        white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        white-space: pre-wrap; /* css-3 */
+        word-wrap: break-word; /* Internet Explorer 5.5+ */
+        white-space: -webkit-pre-wrap; /* Newer versions of Chrome/Safari*/
+        word-break: break-all;
+        white-space: normal;
+    }
+
+    .linkRenk a {
+        color: #fff;
+    }
+</style>
+
+
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-12">
+        <h2>MES - MIKROPOR EXECUTION SYSTEM</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="MesHome">Ana Sayfa</a>
+            </li>
+            @*<li>
+                    <a asp-action="Index" asp-controller="Home">@Localizer["Service"]</a>
+                </li>*@
+            <li class="active">
+                <strong>Mes Cogi</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+    </div>
+</div>
+
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="ibox-content">
+            <div class="row">
+
+
+
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="tab-content">
+                            @*<div id="filtreAlani" class="tab-pane fade in active">
+
+                                </div>*@
+                            <div id="mesCogi" class="tab-pane fade in active">
+
+
+                                <table id="mesCogiTablosu" class="table table-striped table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+
+                                            <th class="th-sm text-wrap" data-field="cogiTanim" style="width:2%">Cogi Tanımı</th>
+                                            <th class="th-sm text-wrap" data-field="siparisNo" style="width:2%">Cogi Tipi</th>
+                                            <th class="th-sm text-wrap" data-field="tarih" style="width:2%">Oluşturulma Tarihi</th>
+                                            <th class="th-sm text-wrap" data-field="durumTamam" style="width:2%">İşleme Al</th>
+                                            <th class="th-sm text-wrap" data-field="durumIptal" style="width:2%">Sil</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mesCogiList">
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="mesCogiSilModal" tabindex="-1" role="dialog" aria-labelledby="mesCogiSilModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lütfen Bir Açıklama Giriniz.</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p></p>
+                <button id="btnCogiSil" type="button" onclick="iptalBtn(CogiId)" class="btn btn-primary">Kaydet</button>
+            </div>
+
+         
+            <div class="modal-footer">
+                <button type='button' class='btn  btn-sm btn-secondary pull-left' data-dismiss='modal'>Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+
+    $(document).ready(function () {
+
+
+        MesCogiListele(@ViewBag.UserId);
+        console.log(@ViewBag.UserId);
+
+
+    });
+
+
+        function MesCogiListele(UserId) {
+            debugger;
+
+        $('#mesCogiList').text("");
+
+            debugger;
+
+            $.ajax({
+
+                     type: "GET",
+                     dataType: "json",
+                     contentType: 'application/json-patch+json',
+                    data: "{}",
+                     //data: "{\"UserId\":" + UserId + "}",
+
+                url: "@ViewBag.UrlPath/api/MesCogi/BildirimleriGoster/" + UserId,
+                    success: function (data) {
+
+                        console.log("_DATA_SUCCESS:::" + data);
+
+                        var tr;
+                 $(data.mesCogiList).each(function (index, element) {
+
+                     tr = "<tr row='" + element.cogiId + "' class='read'>";
+                     tr += "<td>" + element.bildirimTanimi + "</td>";
+
+                     tr += "<td>" + element.cogiType + "</td>";
+                     tr += "<td>" + element.createdDate + "</td>";
+                     tr += "<td> <button onclick= 'tamamlandıBtn(" + element.cogiId + ")' type='button' id='btnTamam' class ='btn btn-success'> Tamam </button></td>";
+                     tr += "<td> <button onclick= 'iptalBtn(" + element.cogiId + ")' type='button' class = ' btn btn-danger'> Sil </button></td>";
+                   //  tr += "<td> <button type='button' class = 'btn btn-danger' data-toggle='modal' data-target = 'mesCogiSilModal'> Sil </button></td>";
+
+
+
+
+                     tr += "</tr>";
+                     $('#mesCogiList').append(tr);
+                 });
+             },
+
+            error: function (e) {
+            },
+            cache: false
+
+
+        });
+
+    }
+
+
+        function tamamlandıBtn(CogiId) {
+
+        console.log(CogiId);
+        debugger;
+
+
+          $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+
+              data: "{\"cogiId\":" + CogiId + ",\"completedBy\":" + @ViewBag.UserId + "}",
+           
+              url: "@ViewBag.UrlPath/api/MesCogi/CogiIslemeAl/",
+            success: function (data) {
+
+                 MesCogiListele(@ViewBag.UserId);
+
+            },
+              complete: function () {
+                  setTimeout(function () {
+                      $('#loadingModal').modal('hide');
+                  }, 1000);
+              },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+
+
+
+    }
+
+
+
+    function iptalBtn(CogiId) {
+
+        console.log(CogiId);
+        debugger;
+
+
+          $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: 'application/json',
+
+              data: "{\"cogiId\":" + CogiId + ",\"canceledBy\":" + @ViewBag.UserId + "}",
+              //beforeSend: function () {
+              //    $('#loadingModal').modal('show');
+              //},
+              url: "@ViewBag.UrlPath/api/MesCogi/CogiIslemSil/",
+            success: function (data) {
+
+                 MesCogiListele(@ViewBag.UserId);
+
+            },
+              //complete: function () {
+              //    setTimeout(function () {
+              //        $('#loadingModal').modal('hide');
+              //    }, 1000);
+              //},
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+
+
+
+    }
+
+
+
+
+
+</script>
+
+
+

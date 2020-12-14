@@ -1,0 +1,349 @@
+﻿@{
+    Layout = "_LayoutACSAdmin";
+}
+<style>
+    .contentText {
+        float: left;
+        width: 100%;
+        padding: 0px 0px 6px 0px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #efefef;
+    }
+
+    .font-normal {
+        float: left;
+        width: 100%;
+    }
+
+    .fileList {
+        margin: 15px 0px;
+    }
+
+        .fileList .btn-xs {
+            float: right;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+
+    .file {
+        margin-right: 10px;
+    }
+
+    .removeFile {
+        position: absolute;
+        right: 15px;
+        top: 6px;
+        z-index: 999;
+    }
+
+    .attachment {
+        list-style: none;
+        float: left;
+        margin-left: 0px;
+        padding-left: 15px;
+    }
+
+        .attachment .file-box {
+            position: relative;
+        }
+
+    .file-box {
+        float: left;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Garanti İptali</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="AdminHome">Anasayfa</a>
+            </li>
+            <li class="active">
+                <strong>Garanti İptali</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="ibox float-e-margins" style="margin-top:15px">
+    <div class="ibox-title">
+        <h5>Garanti İptal Et</h5>
+
+        <span class="pull-right text-right text-danger">
+
+            <small>(*) İşaretli alanlar zorunludur. </small>
+
+        </span>
+    </div>
+    <div class="ibox-content">
+        <form id="AddGuaranteeForm" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="col-md-12">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="font-normal">Seri No</label>
+                                <input id="SerialNo" name="SerialNo" type="text" required="required" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row"></div>
+                    <button type="button" id="SerialNoCheckButton" class="ladda-button ladda-button-demo btn pull-right btn-primary" data-style="expand-right">İleri</button>
+                    <div class="row"></div>
+                    <div class="col-md-12">
+                        <div class="col-md-12">
+                            <div class="form-group hidden">
+                                <label class="font-normal">Bitiş Tarih</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input id="BanDate" name="BanDate" type="text" data-date-format="dd/mm/yyyy" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="col-md-12">
+                            <div class="form-group hidden">
+                                <label class="font-normal">Açıklama *</label>
+                                <textarea id="Comment" name="Comment" class="form-control" required="required" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-12">
+                            <div class="form-group files hidden">
+                                <label class="font-normal">Dosya Yükle</label>
+                                <input type="file" id="files" name="files" multiple>
+                            </div>
+
+                            <div class="row">
+                                <ul class="attachment">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row"></div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <div class="col-sm-4 text-right pull-right">
+                            <a asp-action="Index" asp-controller="Home" class="btn btn-white">İptal</a>
+                            <button id="BanGuarantee" type="submit" value="BanGuarantee" formaction="AddBanGuarantee" formmethod="post" class="btn btn-primary hidden">Kaydet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+
+    var filesToUpload = [];
+
+    $.fn.fileUploader = function (filesToUpload, sectionIdentifier) {
+        var fileIdCounter = 0;
+
+        this.closest(".files").change(function (evt) {
+            var output = [];
+
+            for (var i = 0; i < evt.target.files.length; i++) {
+                fileIdCounter++;
+
+                var file = evt.target.files[i];
+                var fileId = sectionIdentifier + fileIdCounter;
+
+                filesToUpload.push({
+                    id: fileId,
+                    file: file
+                });
+
+                var removeLink = "<div class=\"removeFile btn btn-danger btn-xs\" data-fileid=\"" + fileId + "\"><i class='fa fa-times-circle-o' aria-hidden='true'></i></div>";
+
+                var dataContent = "";
+
+                if (file.type == "image/jpeg" || file.type == "image/png") {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='#'>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<img alt='image' class='feed-photo' src=" + (window.URL ? URL : webkitURL).createObjectURL(file) + ">" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        escape(file.name) +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                } else {
+                    dataContent += "<li class='file-box'>" +
+                        //removeLink +
+                        "<div class='file'>" +
+                        "<a href='#'>" +
+                        "<span class='corner'></span>" +
+
+                        "<div class='icon'>" +
+                        "<i class='fa fa-file'></i>" +
+                        "</div>" +
+                        "<div class='file-name'>" +
+                        escape(file.name) +
+                        "<br>" +
+
+                        "</div>" +
+                        "</a>" +
+                        "</div>" +
+                        "</li>";
+                }
+
+
+                $(".attachment").append(dataContent);
+
+            };
+            //evt.target.value = null;
+        });
+
+        this.clear = function () {
+            for (var i = 0; i < filesToUpload.length; ++i) {
+                if (filesToUpload[i].id.indexOf(sectionIdentifier) >= 0)
+                    filesToUpload.splice(i, 1);
+            }
+
+            $(this).children(".fileList").empty();
+        }
+
+        return this;
+    };
+
+    (function () {
+        var files1Uploader = $("#files").fileUploader(filesToUpload, "files");
+
+    })()
+
+
+    $('body').on('click', '.removeFile', function (e) {
+        var fileId = $(this).data("fileid");
+        // loop through the files array and check if the name of that file matches FileName
+        // and get the index of the match
+        for (var i = 0; i < filesToUpload.length; ++i) {
+            if (filesToUpload[i].id === fileId)
+                filesToUpload.splice(i, 1);
+        }
+        $(this).parent().remove();
+
+        //$("#files").fileUploader(filesToUpload)
+        $("#files").attr("value", filesToUpload);
+    });
+
+    $(document).ready(function () {
+        getInboxCount();
+    });
+    function getInboxCount() {
+        $('#reportListDataContent').text("");
+        $.ajax({
+            type: "GET",
+            dataType: 'json',
+            data: null,
+            url:"@ViewData["UrlPath"]/api/AddGuarantee/GetInboxCount",
+            success: function (data) {
+                $(".unreadFlags").text(data.readFlagsNothingCount);
+            },
+            error: function (e) {
+
+
+            },
+            cache: false
+        });
+
+    }
+    //Seri numarasını kontrol etmek için gerekli fonksiyonlar.
+    $("#SerialNoCheckButton").on("click", function () {
+
+        var serialNo = $("#SerialNo").val();
+        if (serialNo == null || serialNo == undefined || serialNo == '') {
+            //Uyarı için gerekli fonkisiyon
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning('Seri numarası girilmemiş!');
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { serialNo: $("#SerialNo").val() },
+                url: "@ViewData["UrlPath"]/api/AddGuarantee/SerialNoCheckGuarantee",
+                success: function (data) {
+
+                    if (data.isSuccess) {
+
+                        if (data.isModal == true) {
+
+                            toastr.options = {
+                                closeButton: true,
+                                progressBar: true,
+                                positionClass: "toast-top-center",
+                                showMethod: 'slideDown',
+                                timeOut: 4000
+                            };
+                            toastr.error(data.errorMessage)
+
+                        } else {
+                            $("#AddGuaranteeForm .hidden").removeClass("hidden");
+                            $("#SerialNoCheckButton").addClass("hidden");
+                        }
+
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+
+                    }
+
+
+
+                },
+                error: function (e) {
+
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error(e.responseJSON.message)
+
+                },
+                cache: false
+            });
+        }
+    });
+
+    $("#BanDate").datepicker({
+        todayBtn: "linked",
+        language: "tr",
+        autoclose: true,
+        todayHighlight: true,
+    });
+
+    $("#BanGuarantee").addClass("active");
+
+</script>

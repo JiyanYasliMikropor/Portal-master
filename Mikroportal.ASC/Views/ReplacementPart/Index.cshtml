@@ -1,0 +1,423 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["PageName"];
+    ViewData["LanguageSelection"] = Localizer["LanguageSelection"];
+    ViewData["Welcome"] = Localizer["Welcome"];
+    ViewData["LogOut"] = Localizer["LogOut"];
+    Layout = "_LayoutACSService";
+
+}
+<style>
+    .file {
+        position: relative;
+        background: linear-gradient(to right, lightblue 50%, transparent 50%);
+        background-size: 200% 100%;
+        background-position: right bottom;
+        transition: all 1s ease;
+    }
+
+    .file {
+        border: 1px solid #e7eaec;
+        padding: 0;
+        background-color: #ffffff;
+        position: relative;
+        margin-bottom: 2px;
+        margin-right: 100px;
+    }
+
+        .file.done {
+            background: #1ab394;
+        }
+
+        .file a {
+            display: block;
+            position: relative;
+            padding: 4px 9px;
+            text-align: left;
+            color: #424242;
+            font-size: 10px;
+        }
+
+    .fileList {
+        margin: 15px 0px;
+    }
+
+        .fileList .btn-xs {
+            float: right;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-12">
+        <h2>Yedek Parça</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a asp-action="Index" asp-controller="Home">@Localizer["Home"]</a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-controller="Home"> @Localizer["SparePart"]</a>
+            </li>
+            <li class="active">
+                <strong> @Localizer["SparePart"]</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+    </div>
+</div>
+<div class="wrapper wrapper-content">
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5> Ürün Ara</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="font-normal">@Localizer["SerialNumber"]</label>
+                                        <input id="SerialNo" name="SerialNo" type="text" required="required" onkeyup="SerialNoChange()" class="form-control">
+                                    </div>
+                                    @*<button type="button" id="SerialNoCheckButton" class="ladda-button ladda-button-demo btn pull-right btn-primary" data-style="expand-right">@Localizer["Forward"]</button>*@
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="font-normal">Model No</label>
+                                        <input id="ModelNo" name="ModelNo" type="text" required="required" onkeyup="ModelNoChange()" class="form-control">
+                                    </div>
+                                    <button type="button" id="SearchButton" class="ladda-button ladda-button-demo btn pull-right btn-primary" data-style="expand-right">Ara</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="documentLink" class="col-md-10">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5> Id Resmi</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <div id="documentLinkData"></div>
+                        </div>
+                    </div>
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5> Parça Arama</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="row">
+                                <div id="partNoContent" class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-normal">Parça No</label>
+                                        <input id="PartNo" name="PartNo" type="text" required="required" class="form-control">
+                                    </div>
+                                    <button type="button" id="PartNoCheckButton" class="ladda-button ladda-button-demo btn pull-right btn-primary" data-style="expand-right">Ara</button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="partListContent" class="col-md-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h5> Parça listesi</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="table-wrapper-scroll-y my-custom-scrollbar table-responsive ">
+                                <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                    <thead>
+                                        <tr>
+                                            <th>Dryer Model</th>
+                                            <th>Voltage</th>
+                                            <th>Qty</th>
+                                            <th>Fiyat</th>
+                                            <th>Para Birimi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="partListDataContent">
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $("#partNoContent").css("display", "none");
+    $("#partListContent").css("display", "none");
+    $('#partListDataContent').text("");
+    $("#documentLink").css("display", "none");
+    //Seri numarasını kontrol etmek için gerekli fonksiyonlar.
+    var base_url = window.location.origin;
+    function SerialNoChange() {
+        $("#modelNo").val("");
+    }
+    function ModelNoChange() {
+        $("#SerialNo").val("");
+    }
+
+    $("#SearchButton").on("click", function () {
+        var serialNo = $("#SerialNo").val();
+        var modelNo = $("#ModelNo").val();
+        if ((serialNo == null || serialNo == undefined || serialNo == '') && (modelNo == null || modelNo == undefined || modelNo == '')) {
+            //Uyarı için gerekli fonkisiyon
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning('Seri numarası veya model numarası girilmemiş!');
+        } else {
+            if (serialNo != '') {
+                getSerialNoCheck();
+            } else {
+                getModelNoCheck();
+            }
+
+        }
+
+    });
+
+    function getSerialNoCheck() {
+        $('#partListDataContent').text("");
+        $("#partListContent").css("display", "none");
+        $("#documentLinkData").text("");
+        $("#documentLink").css("display", "none");
+        var serialNo = $("#SerialNo").val();
+        if (serialNo == null || serialNo == undefined || serialNo == '') {
+            //Uyarı için gerekli fonkisiyon
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning('Seri numarası girilmemiş!');
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { serialNo: $("#SerialNo").val() },
+                url: "@ViewData["UrlPath"]/api/ReplacementPart/SerialNoCheckReplacementPart",
+                success: function (data) {
+                    var documentHtml = "";
+                    if (data.isSuccess == true) {
+
+                        documentHtml = '<a href="' + data.path + '/' + data.partNo + '_' + data.docummentType + '_R' + data.docummentRevisionno + '.pdf" target="_blank">Id resmini görmek için tıklayınız</a>'
+                        $("#partNoContent").css("display", "block");
+                        $("#documentLinkData").append(documentHtml);
+                        $("#documentLink").css("display", "block");
+
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+
+                    }
+
+                },
+                error: function (e) {
+
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error(data.errorMessage)
+
+                },
+                cache: false
+            });
+        }
+    }
+    function getModelNoCheck() {
+        $("#documentLink").css("display", "none");
+        $("#documentLinkData").text("");
+        $("#partListContent").css("display", "none");
+        $('#partListDataContent').text("");
+        var modelNo = $("#ModelNo").val();
+        if (modelNo == null || modelNo == undefined || modelNo == '') {
+            //Uyarı için gerekli fonkisiyon
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning('Model numarası girilmemiş!');
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { modelNo: $("#ModelNo").val() },
+                url: "@ViewData["UrlPath"]/api/ReplacementPart/ModelNoCheckReplacementPart",
+                success: function (data) {
+                    var documentHtml = "";
+                    if (data.isSuccess == true) {
+
+                        documentHtml = '<a href="' + data.path + '/' + data.partNo + '_' + data.docummentType + '_R' + data.docummentRevisionno + '.pdf" target="_blank">Id resmini görmek için tıklayınız</a>'
+                        $("#documentLinkData").append(documentHtml);
+                        $("#documentLink").css("display", "block");
+
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+
+                    }
+
+                },
+                error: function (e) {
+
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error(data.errorMessage)
+
+                },
+                cache: false
+            });
+        }
+    }
+
+    //Part numarasına göre fiyat listesi getirme fonksiyonu
+    $("#PartNoCheckButton").on("click", function () {
+        var partNo = $("#PartNo").val();
+        if (partNo == null || partNo == undefined || partNo == '') {
+            //Uyarı için gerekli fonkisiyon
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-center",
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            toastr.warning('Part numarası girilmemiş!');
+        } else {
+            $.ajax({
+                type: "GET",
+                dataType: 'json',
+                data: { partNo: $("#PartNo").val() },
+                url:"@ViewData["UrlPath"]/api/ReplacementPart/GetReplacementPartPriceByPartNo",
+                success: function (data) {
+                    if (data.isSuccess == true) {
+                        $("#partListContent").css("display", "block");
+                        var tr;
+                        $(data.partPriceList).each(function (index, element) {
+                            tr = "<tr row='" + element.machineryServiceId + "' class='read'>";
+
+                            if (element.dryerModel == null || element.dryerModel == undefined) {
+                                tr += "<td></td>";
+                            } else {
+
+                                tr += "<td>" + element.dryerModel + "</td>";
+                            }
+
+                            if (element.voltage == null || element.voltage == undefined) {
+                                tr += "<td></td>";
+                            } else {
+
+                                tr += "<td>" + element.voltage + "</td>";
+                            }
+
+                            if (element.qty == null || element.qty == undefined) {
+                                tr += "<td></td>";
+                            } else {
+                                tr += "<td>" + element.qty + "</td>";
+
+                            }
+                            if (element.price == null || element.price == undefined) {
+                                tr += "<td></td>";
+                            } else {
+                                tr += "<td>" + element.price + "</td>";
+
+                            }
+
+                            if (element.currency == null || element.currency == undefined) {
+                                tr += "<td></td>";
+                            } else {
+                                tr += "<td>" + element.currency + "</td>";
+
+                            }
+                            tr += "</tr>";
+                            $('#partListDataContent').append(tr);
+                        });
+                    } else {
+                        toastr.options = {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-center",
+                            showMethod: 'slideDown',
+                            timeOut: 4000
+                        };
+                        toastr.error(data.errorMessage)
+
+                    }
+
+                },
+                error: function (e) {
+
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-center",
+                        showMethod: 'slideDown',
+                        timeOut: 4000
+                    };
+                    toastr.error(data.errorMessage)
+
+                },
+                cache: false
+            });
+        }
+    });
+
+
+</script>
+
+
+
+
+
