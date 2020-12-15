@@ -24,10 +24,12 @@ namespace Mikroportal.MES.Controllers
             _httpContextAccessor = httpContextAccessor;
             _mesCogiService = mesCogiService;
             _mesHomeService = mesHomeService;
+
         }
 
 
 
+        // jiyan yaşlı
         public IActionResult MesCogiIndex()
         {
             string userId = _httpContextAccessor.HttpContext.Request.Cookies["UserId"];
