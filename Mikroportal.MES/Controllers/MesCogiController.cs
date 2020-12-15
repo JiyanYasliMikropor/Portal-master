@@ -29,7 +29,7 @@ namespace Mikroportal.MES.Controllers
 
 
 
-        // jiyan yaşlı
+        // jiyan yaşlı test
         public IActionResult MesCogiIndex()
         {
             string userId = _httpContextAccessor.HttpContext.Request.Cookies["UserId"];
